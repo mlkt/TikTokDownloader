@@ -8,6 +8,8 @@ build_exe_options = {
     "include_files": [
         ("locale", "locale"),
         ("static", "static"),
+        ("encipher.py", "encipher.py"),
+        ("douyin_websign", "douyin_websign"),
     ],
     "include_msvcr": True,
 }
