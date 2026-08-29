@@ -28,6 +28,12 @@ def parse_arguments():
         default=None,
         help="original_quality 目标值，override/force 模式必填",
     )
+    parser.add_argument(
+        "--record",
+        type=parse_boolean,
+        default=None,
+        help="是否启用作品下载记录，默认使用配置文件设置",
+    )
     args, _ = parser.parse_known_args()
     if args.original_quality_mode == "auto" and args.original_quality is not None:
         parser.error("--original-quality 只能在 override/force 模式下使用")
@@ -46,6 +52,7 @@ async def main():
     async with TikTokDownloader(
         original_quality_mode=args.original_quality_mode,
         original_quality_value=args.original_quality,
+        record=args.record,
     ) as downloader:
         try:
             await downloader.run()

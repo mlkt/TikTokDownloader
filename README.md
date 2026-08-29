@@ -153,7 +153,8 @@ demo()
 <p><b>命令行参数</b><br>
 <code>--original-quality-mode auto|override|force</code> 控制 <code>original_quality</code> 的优先级，默认 <code>auto</code>；<br>
 <code>--original-quality true|false</code> 提供目标值，仅在 <code>override</code> 和 <code>force</code> 模式下必填。<br>
-示例：<code>python main.py --original-quality-mode override --original-quality true</code></p>
+<code>--record true|false</code> 控制本次运行是否启用作品下载记录，不传时使用配置文件设置；一旦传入，本次运行期间菜单「作品下载记录」将不可切换。<br>
+示例：<code>python main.py --original-quality-mode override --original-quality true --record false</code></p>
 </ol>
 </li>
 <li>阅读 DouK-Downloader 的免责声明，根据提示输入内容</li>

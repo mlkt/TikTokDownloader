@@ -155,7 +155,8 @@ demo()
 <p><b>Command-line options</b><br>
 <code>--original-quality-mode auto|override|force</code> controls the priority of <code>original_quality</code>, default <code>auto</code>;<br>
 <code>--original-quality true|false</code> provides the target value, required only in <code>override</code> and <code>force</code> modes.<br>
-Example: <code>python main.py --original-quality-mode override --original-quality true</code></p>
+<code>--record true|false</code> controls whether download history is enabled for this run; when omitted, the config file setting is used. Once provided, the menu "作品下载记录" cannot be toggled during this run.<br>
+Example: <code>python main.py --original-quality-mode override --original-quality true --record false</code></p>
 </ol>
 </li>
 <li>Read the disclaimer of DouK-Downloader and enter content according to the prompt.</li>
