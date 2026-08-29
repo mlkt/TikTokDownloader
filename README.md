@@ -150,6 +150,10 @@ demo()
 <li>运行 <code>uv sync --no-dev</code> 命令同步环境依赖</li>
 <li>运行 <code>uv run main.py</code> 命令启动 DouK-Downloader</li>
 </ol>
+<p><b>命令行参数</b><br>
+<code>--original-quality-mode auto|override|force</code> 控制 <code>original_quality</code> 的优先级，默认 <code>auto</code>；<br>
+<code>--original-quality true|false</code> 提供目标值，仅在 <code>override</code> 和 <code>force</code> 模式下必填。<br>
+示例：<code>python main.py --original-quality-mode override --original-quality true</code></p>
 </ol>
 </li>
 <li>阅读 DouK-Downloader 的免责声明，根据提示输入内容</li>

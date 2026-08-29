@@ -110,6 +110,8 @@ class Parameter:
         recorder: "DownloadRecorder",
         browser_info: dict,
         browser_info_tiktok: dict,
+        original_quality_mode: str = "auto",
+        original_quality_value: bool | None = None,
         timeout=10,
         douyin_platform=True,
         tiktok_platform=True,
@@ -183,7 +185,23 @@ class Parameter:
         self.run_command = self.__check_run_command(run_command)
         self.ffmpeg = self.__generate_ffmpeg_object(ffmpeg)
         self.live_qualities = self.__check_live_qualities(live_qualities)
-        self.original_quality = self.check_bool_false(original_quality)
+        config_original_quality = self.check_bool_false(original_quality)
+        self.original_quality_config = config_original_quality
+        self.original_quality_mode = (
+            original_quality_mode
+            if original_quality_mode in {"auto", "override", "force"}
+            else "auto"
+        )
+        self.original_quality_value = (
+            original_quality_value
+            if isinstance(original_quality_value, bool)
+            else None
+        )
+        self.original_quality = self.resolve_original_quality_values(
+            self.original_quality_mode,
+            self.original_quality_value,
+            config_original_quality,
+        )
         self.douyin_platform = self.check_bool_true(
             douyin_platform,
         )
@@ -283,6 +301,32 @@ class Parameter:
         value: bool,
     ) -> bool:
         return value if isinstance(value, bool) else True
+
+    @staticmethod
+    def resolve_original_quality_values(
+        mode: str,
+        value: bool | None,
+        global_value: bool,
+        account_value: bool | None = None,
+    ) -> bool:
+        if mode == "force":
+            return value if isinstance(value, bool) else global_value
+        if isinstance(account_value, bool):
+            return account_value
+        if mode == "override" and isinstance(value, bool):
+            return value
+        return global_value
+
+    def resolve_original_quality(
+        self,
+        account_value: bool | None = None,
+    ) -> bool:
+        return self.resolve_original_quality_values(
+            self.original_quality_mode,
+            self.original_quality_value,
+            self.original_quality_config,
+            account_value,
+        )
 
     def __check_cookie_tiktok(
         self,
@@ -868,7 +912,7 @@ class Parameter:
             "max_pages": self.max_pages,
             "run_command": " ".join(self.run_command[::-1]),
             "ffmpeg": self.ffmpeg.path or "",
-            "original_quality": self.original_quality,
+            "original_quality": self.original_quality_config,
         }
 
     async def set_settings_data(

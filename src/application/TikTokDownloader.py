@@ -57,6 +57,8 @@ class TikTokDownloader:
 
     def __init__(
         self,
+        original_quality_mode: str = "auto",
+        original_quality_value: bool | None = None,
     ):
         self.rename_compatible()
         self.console = ColorfulConsole(
@@ -75,6 +77,8 @@ class TikTokDownloader:
         self.config = None
         self.option = None
         self.__function_menu = None
+        self.original_quality_mode = original_quality_mode
+        self.original_quality_value = original_quality_value
 
     @staticmethod
     def rename_compatible():
@@ -417,6 +421,8 @@ class TikTokDownloader:
             console=self.console,
             **self.settings.read(),
             recorder=self.recorder,
+            original_quality_mode=self.original_quality_mode,
+            original_quality_value=self.original_quality_value,
         )
         MigrateFolder(self.parameter).compatible()
         self.parameter.set_headers_cookie()

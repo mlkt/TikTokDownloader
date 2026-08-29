@@ -152,6 +152,10 @@ demo()
 <li>Run the command <code>uv sync --no-dev</code> to synchronize environment dependencies</li>
 <li>Run the command <code>uv run main.py</code> to start DouK-Downloader</li>
 </ol>
+<p><b>Command-line options</b><br>
+<code>--original-quality-mode auto|override|force</code> controls the priority of <code>original_quality</code>, default <code>auto</code>;<br>
+<code>--original-quality true|false</code> provides the target value, required only in <code>override</code> and <code>force</code> modes.<br>
+Example: <code>python main.py --original-quality-mode override --original-quality true</code></p>
 </ol>
 </li>
 <li>Read the disclaimer of DouK-Downloader and enter content according to the prompt.</li>

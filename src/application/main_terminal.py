@@ -733,6 +733,7 @@ class TikTok:
         original_quality: bool | None = None,
     ):
         self.logger.info(_("开始提取作品数据"))
+        original_quality = self.parameter.resolve_original_quality(original_quality)
         id_, name, mark = self.extractor.preprocessing_data(
             info or data,
             tiktok,
