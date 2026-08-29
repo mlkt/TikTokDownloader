@@ -156,10 +156,17 @@ class Extractor:
         recorder: "BaseTextLogger",
         type_: str = "detail",
         tiktok: bool = False,
+        original_quality: bool | None = None,
         **kwargs,
     ) -> list[dict]:
         if type_ not in self.type.keys():
             raise DownloaderError
+        if not isinstance(original_quality, bool):
+            original_quality = None
+        if type_ in {"batch", "detail"}:
+            kwargs["original_quality"] = (
+                self.original_quality if original_quality is None else original_quality
+            )
         return await self.type[type_](data, recorder, tiktok, **kwargs)
 
     async def __batch(
@@ -172,6 +179,7 @@ class Extractor:
         earliest: date,
         latest: date,
         same: bool = True,
+        original_quality: bool | None = None,
     ) -> list[dict]:
         """批量下载作品"""
         container = SimpleNamespace(
@@ -190,6 +198,7 @@ class Extractor:
             data,
             container,
             tiktok,
+            original_quality,
         )
         container.all_data = self.__clean_extract_data(
             container.all_data,
@@ -221,10 +230,15 @@ class Extractor:
         self,
         container: SimpleNamespace,
         data: SimpleNamespace,
+        original_quality: bool | None = None,
     ) -> None:
         """批量提取作品信息"""
         container.cache = container.template.copy()
-        self.__extract_detail_info(container.cache, data)
+        self.__extract_detail_info(
+            container.cache,
+            data,
+            original_quality,
+        )
         self.__extract_account_info(container, data)
         self.__extract_music(container.cache, data)
         self.__extract_statistics(container.cache, data)
@@ -237,10 +251,15 @@ class Extractor:
         self,
         container: SimpleNamespace,
         data: SimpleNamespace,
+        original_quality: bool | None = None,
     ) -> None:
         """批量提取作品信息"""
         container.cache = container.template.copy()
-        self.__extract_detail_info_tiktok(container.cache, data)
+        self.__extract_detail_info_tiktok(
+            container.cache,
+            data,
+            original_quality,
+        )
         self.__extract_account_info_tiktok(container, data)
         self.__extract_music(container.cache, data, True)
         self.__extract_statistics_tiktok(container.cache, data)
@@ -307,6 +326,7 @@ class Extractor:
         self,
         item: dict,
         data: SimpleNamespace,
+        original_quality: bool | None = None,
     ) -> None:
         item["id"] = self.safe_extract(data, "aweme_id")
         item["desc"] = (
@@ -318,12 +338,17 @@ class Extractor:
         item["create_timestamp"] = self.safe_extract(data, "create_time")
         item["create_time"] = self.__format_date(item["create_timestamp"])
         self.__extract_text_extra(item, data)
-        self.__classifying_detail(item, data)
+        self.__classifying_detail(
+            item,
+            data,
+            original_quality,
+        )
 
     def __extract_detail_info_tiktok(
         self,
         item: dict,
         data: SimpleNamespace,
+        original_quality: bool | None = None,
     ) -> None:
         item["id"] = self.safe_extract(data, "id")
         item["desc"] = (
@@ -335,12 +360,17 @@ class Extractor:
         )
         item["create_time"] = self.__format_date(item["create_timestamp"])
         self.__extract_text_extra_tiktok(item, data)
-        self.__classifying_detail_tiktok(item, data)
+        self.__classifying_detail_tiktok(
+            item,
+            data,
+            original_quality,
+        )
 
     def __classifying_detail(
         self,
         item: dict,
         data: SimpleNamespace,
+        original_quality: bool | None = None,
     ) -> None:
         # 作品分类
         if images := self.safe_extract(data, "images"):
@@ -350,12 +380,14 @@ class Extractor:
                 item,
                 data,
                 _("视频"),
+                original_quality,
             )
 
     def __classifying_detail_tiktok(
         self,
         item: dict,
         data: SimpleNamespace,
+        original_quality: bool | None = None,
     ) -> None:
         if images := self.safe_extract(data, "imagePost.images"):
             self.__extract_image_info_tiktok(item, data, images)
@@ -364,6 +396,7 @@ class Extractor:
                 item,
                 data,
                 _("视频"),
+                original_quality,
             )
 
     def __extract_additional_info(
@@ -479,6 +512,7 @@ class Extractor:
         item: dict,
         data: SimpleNamespace,
         type_=_("视频"),
+        original_quality: bool | None = None,
     ) -> None:
         item["type"] = type_
         item["height"], item["width"], item["downloads"] = (
@@ -490,7 +524,9 @@ class Extractor:
             self.safe_extract(data, "video.duration", 0)
         )
         item["uri"] = self.safe_extract(data, "video.play_addr.uri")
-        if self.original_quality:
+        if original_quality is None:
+            original_quality = self.original_quality
+        if original_quality:
             item["downloads"] = self.generate_original_quality_url(item["uri"])
         self.__extract_cover(item, data, True)
 
@@ -571,6 +607,7 @@ class Extractor:
         item: dict,
         data: SimpleNamespace,
         type_: str = _("视频"),
+        original_quality: bool | None = None,
     ) -> None:
         item["type"] = type_
         # item["downloads"] = self.safe_extract(
@@ -974,12 +1011,14 @@ class Extractor:
         data: list[dict],
         container: SimpleNamespace,
         tiktok: bool,
+        original_quality: bool | None = None,
     ) -> None:
         if tiktok:
             [
                 self.__extract_batch_tiktok(
                     container,
                     self.generate_data_object(item),
+                    original_quality,
                 )
                 for item in data
             ]
@@ -988,6 +1027,7 @@ class Extractor:
                 self.__extract_batch(
                     container,
                     self.generate_data_object(item),
+                    original_quality,
                 )
                 for item in data
             ]
@@ -997,6 +1037,7 @@ class Extractor:
         data: list[dict],
         recorder: "BaseTextLogger",
         tiktok: bool,
+        original_quality: bool | None = None,
     ) -> list[dict]:
         container = SimpleNamespace(
             all_data=[],
@@ -1010,6 +1051,7 @@ class Extractor:
             data,
             container,
             tiktok,
+            original_quality,
         )
         container.all_data = self.__clean_extract_data(
             container.all_data, self.detail_necessary_keys
