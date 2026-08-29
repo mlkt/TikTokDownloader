@@ -1,12 +1,51 @@
 from asyncio import sleep
 from math import log
+from os import getenv
 from random import lognormvariate
+from sys import argv
 from typing import TYPE_CHECKING
 
 from src.translation import _
 
 if TYPE_CHECKING:
     from src.tools import ColorfulConsole
+
+
+def _get_config_value(
+    argument: str,
+    environment: str,
+    default: int,
+) -> int:
+    try:
+        index = argv.index(argument)
+        if index + 1 < len(argv):
+            value = int(argv[index + 1])
+            if value >= 0:
+                return value
+    except (ValueError, TypeError):
+        pass
+
+    try:
+        value = int(getenv(environment, ""))
+        if value >= 0:
+            return value
+    except (ValueError, TypeError):
+        pass
+
+    return default
+
+
+BATCHES = _get_config_value(
+    "--suspend-batches",
+    "DOUK_DOWNLOADER_SUSPEND_BATCHES",
+    10,
+)
+
+REST_TIME = _get_config_value(
+    "--suspend-interval",
+    "DOUK_DOWNLOADER_SUSPEND_INTERVAL",
+    60 * 5,
+)
 
 
 def get_wait_time(
@@ -56,16 +95,17 @@ async def suspend(count: int, console: "ColorfulConsole") -> None:
     说明: 此处的一个数据代表一个账号或者一个合集，并非代表一个数据包
     """
     # 启用该函数
-    batches = 10  # 根据实际需求修改
-    if not count % batches:
-        rest_time = 60 * 5  # 根据实际需求修改
+    if BATCHES == 0 or REST_TIME == 0:
+        return
+
+    if not count % BATCHES:
         console.print(
             _(
                 "程序连续处理了 {batches} 个数据，为了避免请求频率过高导致账号或 IP 被风控，"
                 "程序已经暂停运行，将在 {rest_time} 秒后恢复运行！"
-            ).format(batches=batches, rest_time=rest_time),
+            ).format(batches=BATCHES, rest_time=REST_TIME),
         )
-        await sleep(rest_time)
+        await sleep(REST_TIME)
     # 禁用该函数
     # pass
 
