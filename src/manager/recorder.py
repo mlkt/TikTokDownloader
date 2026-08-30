@@ -128,9 +128,9 @@ class DownloadRecorder:
             await self.database.has_download_data(id_) if self.switch and id_ else False
         )
 
-    async def update_id(self, id_: str):
+    async def update_id(self, id_: str, **metadata):
         if self.switch and id_:
-            await self.database.write_download_data(id_)
+            await self.database.write_download_data(id_, **metadata)
 
     async def delete_id(self, id_: str) -> None:
         if self.switch and id_:

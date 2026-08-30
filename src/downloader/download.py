@@ -58,6 +58,7 @@ class Downloader:
         "audio/mpeg": "mp3",
     }
     WRITE_BUFFER_SIZE = 1024 * 1024 * 100
+    DOWNLOAD_TIME_FORMAT = "%Y-%m-%d %H.%M.%S"
 
     def __init__(
         self,
@@ -244,6 +245,7 @@ class Downloader:
                 actual_root,
                 "download",
                 True,
+                metadata=self.download_metadata(i),
                 type_=_("音乐"),
             )
         await self.downloader_chart(
@@ -328,6 +330,7 @@ class Downloader:
                 "item": item,
                 "temp_root": temp_root,
                 "actual_root": actual_root,
+                "metadata": self.download_metadata(item),
             }
             if (t := item["type"]) == _("图集"):
                 await self.download_image(
@@ -415,6 +418,7 @@ class Downloader:
         actual_root: Path,
         suffix: str = "jpeg",
         type_: str = _("图集"),
+        metadata: dict = None,
     ) -> None:
         if not item["downloads"]:
             self.log.error(
@@ -452,6 +456,7 @@ class Downloader:
                     f"【{type_}】{name}_{index}",
                     id_,
                     suffix,
+                    metadata,
                 )
             )
 
@@ -466,6 +471,7 @@ class Downloader:
         actual_root: Path,
         suffix: str = "mp4",
         type_: str = _("视频"),
+        metadata: dict = None,
     ) -> None:
         if not item["downloads"]:
             self.log.error(
@@ -496,6 +502,7 @@ class Downloader:
                 f"【{type_}】{name}",
                 id_,
                 suffix,
+                metadata,
             )
         )
 
@@ -511,6 +518,7 @@ class Downloader:
         switch: bool = False,
         suffix: str = "mp3",
         type_: str = _("音乐"),
+        metadata: dict = None,
         **kwargs,
     ) -> None:
         if self.check_deal_music(
@@ -529,6 +537,7 @@ class Downloader:
                     ),
                     id_,
                     suffix,
+                    metadata,
                 )
             )
 
@@ -542,6 +551,7 @@ class Downloader:
         actual_root: Path,
         static_suffix: str = "jpeg",
         dynamic_suffix: str = "webp",
+        metadata: dict = None,
         **kwargs,
     ) -> None:
         if all(
@@ -561,6 +571,7 @@ class Downloader:
                     f"【封面】{name}",
                     id_,
                     static_suffix,
+                    metadata,
                 )
             )
         if all(
@@ -580,6 +591,7 @@ class Downloader:
                     f"【动图】{name}",
                     id_,
                     dynamic_suffix,
+                    metadata,
                 )
             )
 
@@ -601,8 +613,9 @@ class Downloader:
         show: str,
         id_: str,
         suffix: str,
-        count: SimpleNamespace,
-        progress: Progress,
+        metadata: dict = None,
+        count: SimpleNamespace = None,
+        progress: Progress = None,
         headers: dict = None,
         tiktok=False,
         unknown_size=False,
@@ -662,6 +675,7 @@ class Downloader:
                             position,
                             count,
                             progress,
+                            metadata=metadata,
                         )
                     case 0:
                         return True
@@ -707,6 +721,7 @@ class Downloader:
         position: int,
         count: SimpleNamespace,
         progress: Progress,
+        metadata: dict = None,
     ) -> bool:
         task_id = progress.add_task(
             beautify_string(show, self.truncate),
@@ -736,7 +751,17 @@ class Downloader:
         self.save_file(cache, actual)
         self.log.info(_("{show} 文件下载成功").format(show=show))
         self.log.info(f"文件路径 {actual.resolve()}", False)
-        await self.recorder.update_id(id_)
+        metadata = metadata or {}
+        await self.recorder.update_id(
+            id_,
+            author_uid=metadata.get("author_uid", ""),
+            author_nickname=metadata.get("author_nickname", ""),
+            desc=metadata.get("desc", ""),
+            publish_time=metadata.get("publish_time", 0),
+            publish_time_str=metadata.get("publish_time_str", ""),
+            download_time=int(time()),
+            download_time_str=datetime.now().strftime(self.DOWNLOAD_TIME_FORMAT),
+        )
         self.add_count(show, id_, count)
         return True
 
@@ -841,6 +866,22 @@ class Downloader:
             ),
             length=self.name_length,
         )
+
+    def download_metadata(self, item: dict) -> dict:
+        """生成用于写入下载记录的元数据"""
+        publish_time = item.get("create_timestamp") or 0
+        publish_time_str = (
+            datetime.fromtimestamp(publish_time).strftime(self.DOWNLOAD_TIME_FORMAT)
+            if publish_time
+            else ""
+        )
+        return {
+            "author_uid": str(item.get("uid") or ""),
+            "author_nickname": str(item.get("nickname") or ""),
+            "desc": str(item.get("desc") or ""),
+            "publish_time": publish_time,
+            "publish_time_str": publish_time_str,
+        }
 
     @staticmethod
     def create_detail_folder(
