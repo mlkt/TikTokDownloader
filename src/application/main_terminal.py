@@ -111,6 +111,8 @@ class TikTok:
         self.database = database
         self.console = parameter.console
         self.logger = parameter.logger
+        self.suspend_batches = parameter.suspend_batches
+        self.suspend_interval = parameter.suspend_interval
         API.init_progress_object(
             server_mode,
         )
@@ -409,7 +411,12 @@ class TikTok:
             # break  # 调试代码
             count.success += 1
             if index != len(accounts):
-                await suspend(index, self.console)
+                await suspend(
+                    index,
+                    self.console,
+                    batches=self.suspend_batches,
+                    rest_time=self.suspend_interval,
+                )
         self.__summarize_results(
             count,
             _("账号"),
@@ -529,7 +536,12 @@ class TikTok:
                 continue
             count.success += 1
             if index != len(links):
-                await suspend(index, self.console)
+                await suspend(
+                    index,
+                    self.console,
+                    batches=self.suspend_batches,
+                    rest_time=self.suspend_interval,
+                )
         self.__summarize_results(
             count,
             _("账号"),
@@ -1591,7 +1603,12 @@ class TikTok:
                 continue
             count.success += 1
             if index != len(ids):
-                await suspend(index, self.console)
+                await suspend(
+                    index,
+                    self.console,
+                    batches=self.suspend_batches,
+                    rest_time=self.suspend_interval,
+                )
         self.__summarize_results(
             count,
             _("合集"),
@@ -1651,7 +1668,12 @@ class TikTok:
                 continue
             count.success += 1
             if index != len(mix):
-                await suspend(index, self.console)
+                await suspend(
+                    index,
+                    self.console,
+                    batches=self.suspend_batches,
+                    rest_time=self.suspend_interval,
+                )
         self.__summarize_results(
             count,
             _("合集"),

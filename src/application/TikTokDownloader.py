@@ -60,6 +60,8 @@ class TikTokDownloader:
         original_quality_mode: str = "auto",
         original_quality_value: bool | None = None,
         record: bool | None = None,
+        suspend_batches: int = 1,
+        suspend_interval: int = 30,
     ):
         self.rename_compatible()
         self.console = ColorfulConsole(
@@ -81,6 +83,8 @@ class TikTokDownloader:
         self.original_quality_mode = original_quality_mode
         self.original_quality_value = original_quality_value
         self.record_override = record
+        self.suspend_batches = suspend_batches
+        self.suspend_interval = suspend_interval
 
     @staticmethod
     def rename_compatible():
@@ -433,6 +437,8 @@ class TikTokDownloader:
             recorder=self.recorder,
             original_quality_mode=self.original_quality_mode,
             original_quality_value=self.original_quality_value,
+            suspend_batches=self.suspend_batches,
+            suspend_interval=self.suspend_interval,
         )
         MigrateFolder(self.parameter).compatible()
         self.parameter.set_headers_cookie()

@@ -12,6 +12,16 @@ def parse_boolean(value: str) -> bool:
     raise ArgumentTypeError(f"布尔值无效: {value}")
 
 
+def parse_non_negative_integer(value: str) -> int:
+    try:
+        value = int(value)
+    except ValueError:
+        raise ArgumentTypeError(f"非负整数无效: {value}")
+    if value < 0:
+        raise ArgumentTypeError(f"非负整数无效: {value}")
+    return value
+
+
 def parse_arguments():
     parser = ArgumentParser(
         description="DouK-Downloader 命令行参数",
@@ -34,6 +44,18 @@ def parse_arguments():
         default=None,
         help="是否启用作品下载记录，默认使用配置文件设置",
     )
+    parser.add_argument(
+        "--suspend-batches",
+        type=parse_non_negative_integer,
+        default=1,
+        help="每处理多少条数据后暂停，0 表示禁用，默认 1",
+    )
+    parser.add_argument(
+        "--suspend-interval",
+        type=parse_non_negative_integer,
+        default=30,
+        help="暂停秒数，0 表示禁用，默认 30",
+    )
     args, _ = parser.parse_known_args()
     if args.original_quality_mode == "auto" and args.original_quality is not None:
         parser.error("--original-quality 只能在 override/force 模式下使用")
@@ -53,6 +75,8 @@ async def main():
         original_quality_mode=args.original_quality_mode,
         original_quality_value=args.original_quality,
         record=args.record,
+        suspend_batches=args.suspend_batches,
+        suspend_interval=args.suspend_interval,
     ) as downloader:
         try:
             await downloader.run()

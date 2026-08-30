@@ -112,6 +112,8 @@ class Parameter:
         browser_info_tiktok: dict,
         original_quality_mode: str = "auto",
         original_quality_value: bool | None = None,
+        suspend_batches: int = 1,
+        suspend_interval: int = 30,
         timeout=10,
         douyin_platform=True,
         tiktok_platform=True,
@@ -202,6 +204,8 @@ class Parameter:
             self.original_quality_value,
             config_original_quality,
         )
+        self.suspend_batches = suspend_batches
+        self.suspend_interval = suspend_interval
         self.douyin_platform = self.check_bool_true(
             douyin_platform,
         )
