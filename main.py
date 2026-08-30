@@ -1,7 +1,6 @@
-from argparse import ArgumentParser, ArgumentTypeError
+from argparse import ArgumentParser, ArgumentTypeError, RawDescriptionHelpFormatter
 from asyncio import CancelledError, run
-
-from src.application import TikTokDownloader
+from typing import Sequence
 
 
 def parse_boolean(value: str) -> bool:
@@ -22,41 +21,95 @@ def parse_non_negative_integer(value: str) -> int:
     return value
 
 
-def parse_arguments():
+def create_parser() -> ArgumentParser:
     parser = ArgumentParser(
-        description="DouK-Downloader 命令行参数",
+        prog="DouK-Downloader",
+        description=(
+            "DouK-Downloader 命令行启动参数。\n"
+            "不传任何参数时将启动交互式主菜单；传入参数将覆盖本次运行的部分设置。"
+        ),
+        add_help=False,
+        formatter_class=RawDescriptionHelpFormatter,
+        epilog=(
+            "示例：\n"
+            "  python main.py --help\n"
+            "  DouK-Downloader --help\n"
+            "  DouK-Downloader --original-quality-mode override --original-quality true --record false\n"
+            "  DouK-Downloader --suspend-batches 10 --suspend-interval 300\n"
+            "完整参数说明请查阅项目文档。"
+        ),
+    )
+    parser.add_argument(
+        "-h",
+        "--help",
+        action="help",
+        help="显示本帮助信息并退出。",
     )
     parser.add_argument(
         "--original-quality-mode",
         choices=("auto", "override", "force"),
         default="auto",
-        help="original_quality 优先级模式，默认 auto",
+        help=(
+            "original_quality 优先级模式。"
+            "可选值：auto（默认，使用配置文件和账号级设置）、"
+            "override（使用命令行值覆盖全局配置，账号级设置仍优先）、"
+            "force（强制覆盖包括账号级设置在内的全部配置）。"
+            "默认：auto。"
+        ),
     )
     parser.add_argument(
         "--original-quality",
         type=parse_boolean,
+        metavar="{true,false}",
         default=None,
-        help="original_quality 目标值，override/force 模式必填",
+        help=(
+            "original_quality 目标值，仅在 override/force 模式下必填。"
+            "可选值：true、false（兼容 1、0，不区分大小写）。"
+            "true 表示优先下载原画/最高画质，false 表示不强制原画。"
+            "默认：未设置。"
+        ),
     )
     parser.add_argument(
         "--record",
         type=parse_boolean,
+        metavar="{true,false}",
         default=None,
-        help="是否启用作品下载记录，默认使用配置文件设置",
+        help=(
+            "本次运行是否启用作品下载记录。"
+            "可选值：true、false（兼容 1、0，不区分大小写）。"
+            "省略时使用配置文件 Record 设置；传入后本次运行期间主菜单中的"
+            "“作品下载记录”不可切换。"
+            "默认：未设置。"
+        ),
     )
     parser.add_argument(
         "--suspend-batches",
         type=parse_non_negative_integer,
+        metavar="N",
         default=1,
-        help="每处理多少条数据后暂停，0 表示禁用，默认 1",
+        help=(
+            "批量处理账号/合集时，每处理 N 个数据后暂停。"
+            "N 必须为非负整数，0 表示禁用暂停。"
+            "默认：1。"
+        ),
     )
     parser.add_argument(
         "--suspend-interval",
         type=parse_non_negative_integer,
+        metavar="N",
         default=30,
-        help="暂停秒数，0 表示禁用，默认 30",
+        help=(
+            "每次暂停的时间，单位秒。"
+            "N 必须为非负整数，0 表示禁用暂停。"
+            "默认：30。"
+        ),
     )
-    args, _ = parser.parse_known_args()
+    return parser
+
+
+def parse_arguments(argv: Sequence[str] | None = None):
+    parser = create_parser()
+    args, _ = parser.parse_known_args(argv)
     if args.original_quality_mode == "auto" and args.original_quality is not None:
         parser.error("--original-quality 只能在 override/force 模式下使用")
     if (
@@ -71,6 +124,10 @@ def parse_arguments():
 
 async def main():
     args = parse_arguments()
+
+    # 延迟导入，确保 --help 无需加载第三方依赖即可使用。
+    from src.application import TikTokDownloader
+
     async with TikTokDownloader(
         original_quality_mode=args.original_quality_mode,
         original_quality_value=args.original_quality,
