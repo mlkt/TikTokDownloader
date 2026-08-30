@@ -154,12 +154,12 @@ demo()
 </ol>
 <p><b>Command-line options</b><br>
 Run <code>python main.py --help</code> (or <code>-h</code>) to display the complete list of options, accepted values, defaults, descriptions, and examples;<br>
-<code>--original-quality-mode auto|override|force</code> controls the priority of <code>original_quality</code>, default <code>auto</code>; <code>auto</code> uses the configuration file and account-level settings, <code>override</code> overrides the global configuration while account-level settings still take priority, and <code>force</code> overrides all settings including account-level values;<br>
-<code>--original-quality true|false</code> provides the target value, required only in <code>override</code> and <code>force</code> modes; values <code>1/0</code> are accepted and matching is case-insensitive;<br>
+<code>--original-quality-mode config|global|override</code> controls the priority of <code>original_quality</code>, default <code>config</code>; <code>config</code> uses the configuration file and account-level settings, <code>global</code> overrides the global configuration while account-level settings still take priority, and <code>override</code> overrides all settings including account-level values;<br>
+<code>--original-quality true|false</code> provides the target value, required only in <code>global</code> and <code>override</code> modes; values <code>1/0</code> are accepted and matching is case-insensitive;<br>
 <code>--record true|false</code> controls whether download history is enabled for this run; when omitted, the config file setting is used. Once provided, the menu "作品下载记录" cannot be toggled during this run;<br>
 <code>--suspend-batches integer</code> controls how many accounts/collections are processed between pauses, 0 disables pauses, default 1;<br>
 <code>--suspend-interval integer</code> controls the pause duration in seconds, 0 disables pauses, default 30;<br>
-Example: <code>python main.py --original-quality-mode override --original-quality true --record false --suspend-batches 10 --suspend-interval 300</code></p>
+Example: <code>python main.py --original-quality-mode global --original-quality true --record false --suspend-batches 10 --suspend-interval 300</code></p>
 </ol>
 </li>
 <li>Read the disclaimer of DouK-Downloader and enter content according to the prompt.</li>

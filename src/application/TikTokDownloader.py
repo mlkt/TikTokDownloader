@@ -57,7 +57,7 @@ class TikTokDownloader:
 
     def __init__(
         self,
-        original_quality_mode: str = "auto",
+        original_quality_mode: str = "config",
         original_quality_value: bool | None = None,
         record: bool | None = None,
         suspend_batches: int = 1,

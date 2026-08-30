@@ -110,7 +110,7 @@ class Parameter:
         recorder: "DownloadRecorder",
         browser_info: dict,
         browser_info_tiktok: dict,
-        original_quality_mode: str = "auto",
+        original_quality_mode: str = "config",
         original_quality_value: bool | None = None,
         suspend_batches: int = 1,
         suspend_interval: int = 30,
@@ -191,8 +191,8 @@ class Parameter:
         self.original_quality_config = config_original_quality
         self.original_quality_mode = (
             original_quality_mode
-            if original_quality_mode in {"auto", "override", "force"}
-            else "auto"
+            if original_quality_mode in {"config", "global", "override"}
+            else "config"
         )
         self.original_quality_value = (
             original_quality_value
@@ -313,11 +313,11 @@ class Parameter:
         global_value: bool,
         account_value: bool | None = None,
     ) -> bool:
-        if mode == "force":
+        if mode == "override":
             return value if isinstance(value, bool) else global_value
         if isinstance(account_value, bool):
             return account_value
-        if mode == "override" and isinstance(value, bool):
+        if mode == "global" and isinstance(value, bool):
             return value
         return global_value
 
