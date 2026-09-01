@@ -34,7 +34,7 @@ def create_parser() -> ArgumentParser:
             "示例：\n"
             "  python main.py --help\n"
             "  DouK-Downloader --help\n"
-            "  DouK-Downloader --original-quality-mode global --original-quality true\n"
+            "  DouK-Downloader --original-quality-mode global --original-quality true --record false\n"
             "  DouK-Downloader --suspend-batches 10 --suspend-interval 300\n"
             "完整参数说明请查阅项目文档。"
         ),
@@ -66,6 +66,19 @@ def create_parser() -> ArgumentParser:
             "original_quality 目标值，仅在 global/override 模式下必填。"
             "可选值：true、false（兼容 1、0，不区分大小写）。"
             "true 表示优先下载原画/最高画质，false 表示不强制原画。"
+            "默认：未设置。"
+        ),
+    )
+    parser.add_argument(
+        "--record",
+        type=parse_boolean,
+        metavar="{true,false}",
+        default=None,
+        help=(
+            "本次运行是否启用作品下载记录。"
+            "可选值：true、false（兼容 1、0，不区分大小写）。"
+            "省略时使用配置文件 Record 设置；传入后本次运行期间主菜单中的"
+            "“作品下载记录”不可切换。"
             "默认：未设置。"
         ),
     )
@@ -118,6 +131,7 @@ async def main():
     async with TikTokDownloader(
         original_quality_mode=args.original_quality_mode,
         original_quality_value=args.original_quality,
+        record=args.record,
         suspend_batches=args.suspend_batches,
         suspend_interval=args.suspend_interval,
     ) as downloader:

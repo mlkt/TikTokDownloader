@@ -59,6 +59,7 @@ class TikTokDownloader:
         self,
         original_quality_mode: str = "config",
         original_quality_value: bool | None = None,
+        record: bool | None = None,
         suspend_batches: int = 1,
         suspend_interval: int = 30,
     ):
@@ -81,6 +82,7 @@ class TikTokDownloader:
         self.__function_menu = None
         self.original_quality_mode = original_quality_mode
         self.original_quality_value = original_quality_value
+        self.record_override = record
         self.suspend_batches = suspend_batches
         self.suspend_interval = suspend_interval
 
@@ -92,6 +94,8 @@ class TikTokDownloader:
         self.config = self.__format_config(await self.database.read_config_data())
         self.option = self.__format_config(await self.database.read_option_data())
         self.set_language(self.option["Language"])
+        if self.record_override is not None:
+            self.config["Record"] = int(self.record_override)
 
     @staticmethod
     def __format_config(config: list) -> dict:
@@ -132,7 +136,8 @@ class TikTokDownloader:
             # (_("Web API 模式"), self.__api_object),
             # (_("Web UI 模式"), self.__web_ui_object),
             (
-                _("{}作品下载记录").format(options[self.config["Record"]]),
+                _("{}作品下载记录").format(options[self.config["Record"]])
+                + (_("(启动参数锁定)") if self.record_override is not None else ""),
                 self.__modify_record,
             ),
             (_("删除作品下载记录"), self.delete_works_ids),
@@ -328,6 +333,11 @@ class TikTokDownloader:
         self,
         key: str,
     ):
+        if key == "Record" and self.record_override is not None:
+            self.console.warning(
+                _("本次运行已由启动参数锁定作品下载记录，无法在菜单中修改！"),
+            )
+            return
         self.config[key] = 0 if self.config[key] else 1
         await self.database.update_config_data(key, self.config[key])
         self.console.print(_("修改设置成功！"))
