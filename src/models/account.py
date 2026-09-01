@@ -10,6 +10,7 @@ class Account(APIModel):
     latest: str | float | int | None = None
     pages: int | None = None
     cursor: int = 0
+    original_quality: bool | None = None
     count: int = Field(
         18,
         gt=0,

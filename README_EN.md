@@ -154,9 +154,11 @@ demo()
 </ol>
 <p><b>Command-line options</b><br>
 Run <code>python main.py --help</code> (or <code>-h</code>) to display the complete list of options, accepted values, defaults, descriptions, and examples;<br>
+<code>--original-quality-mode config|global|override</code> controls the priority of <code>original_quality</code>, default <code>config</code>; <code>config</code> uses the configuration file and account-level settings, <code>global</code> overrides the global configuration while account-level settings still take priority, and <code>override</code> overrides all settings including account-level values;<br>
+<code>--original-quality true|false</code> provides the target value, required only in <code>global</code> and <code>override</code> modes; values <code>1/0</code> are accepted and matching is case-insensitive;<br>
 <code>--suspend-batches integer</code> controls how many accounts/collections are processed between pauses, 0 disables pauses, default 1;<br>
 <code>--suspend-interval integer</code> controls the pause duration in seconds, 0 disables pauses, default 30;<br>
-Example: <code>python main.py --suspend-batches 10 --suspend-interval 300</code></p>
+Example: <code>python main.py --original-quality-mode global --original-quality true --suspend-batches 10 --suspend-interval 300</code></p>
 </ol>
 </li>
 <li>Read the disclaimer of DouK-Downloader and enter content according to the prompt.</li>

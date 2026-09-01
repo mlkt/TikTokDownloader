@@ -177,8 +177,14 @@ class Extractor:
         earliest: date,
         latest: date,
         same: bool = True,
+        original_quality: bool | None = None,
     ) -> list[dict]:
         """批量下载作品"""
+        original_quality = (
+            self.original_quality
+            if original_quality is None
+            else original_quality
+        )
         container = SimpleNamespace(
             all_data=[],
             template={
@@ -190,6 +196,7 @@ class Extractor:
             same=same,  # 是否相同作者
             earliest=earliest,
             latest=latest,
+            original_quality=original_quality,
         )
         await self.__platform_classify_detail(
             data,
@@ -229,7 +236,7 @@ class Extractor:
     ) -> None:
         """批量提取作品信息"""
         container.cache = container.template.copy()
-        await self.__extract_detail_info(container.cache, data)
+        await self.__extract_detail_info(container, data)
         self.__extract_account_info(container, data)
         self.__extract_music(container.cache, data)
         self.__extract_statistics(container.cache, data)
@@ -310,9 +317,10 @@ class Extractor:
 
     async def __extract_detail_info(
         self,
-        item: dict,
+        container: SimpleNamespace,
         data: SimpleNamespace,
     ) -> None:
+        item = container.cache
         item["id"] = self.safe_extract(data, "aweme_id")
         item["desc"] = (
             self.__clean_description(
@@ -323,7 +331,7 @@ class Extractor:
         item["create_timestamp"] = self.safe_extract(data, "create_time")
         item["create_time"] = self.__format_date(item["create_timestamp"])
         self.__extract_text_extra(item, data)
-        await self.__classifying_detail(item, data)
+        await self.__classifying_detail(container, data)
 
     def __extract_detail_info_tiktok(
         self,
@@ -344,15 +352,16 @@ class Extractor:
 
     async def __classifying_detail(
         self,
-        item: dict,
+        container: SimpleNamespace,
         data: SimpleNamespace,
     ) -> None:
+        item = container.cache
         # 作品分类
         if images := self.safe_extract(data, "images"):
             await self.__extract_image_info(item, data, images)
         else:
             await self.__extract_video_info(
-                item,
+                container,
                 data,
                 _("视频"),
             )
@@ -481,10 +490,11 @@ class Extractor:
 
     async def __extract_video_info(
         self,
-        item: dict,
+        container: SimpleNamespace,
         data: SimpleNamespace,
         type_=_("视频"),
     ) -> None:
+        item = container.cache
         item["type"] = type_
         (
             item["height"],
@@ -492,6 +502,7 @@ class Extractor:
             item["downloads"],
         ) = await self.__extract_video_download(
             data,
+            container=container,
             use_original_quality=True,
         )
         item["duration"] = self.time_conversion(
@@ -515,6 +526,7 @@ class Extractor:
     async def __extract_video_download(
         self,
         data: SimpleNamespace,
+        container: SimpleNamespace | None = None,
         use_original_quality: bool = False,
     ) -> tuple[int, int, str]:
         bit_rate: list[SimpleNamespace] = self.safe_extract(
@@ -576,7 +588,12 @@ class Extractor:
                 bit_rate[0],
                 f"play_addr.url_list[{VIDEO_INDEX}]",
             )
-        if use_original_quality and self.original_quality:
+        original_quality = (
+            getattr(container, "original_quality", self.original_quality)
+            if container is not None
+            else self.original_quality
+        )
+        if use_original_quality and original_quality:
             uri = self.safe_extract(data, "video.play_addr.uri")
             if uri:
                 original_url = self.generate_original_quality_url(uri)
@@ -1034,7 +1051,13 @@ class Extractor:
         data: list[dict],
         recorder: "BaseTextLogger",
         tiktok: bool,
+        original_quality: bool | None = None,
     ) -> list[dict]:
+        original_quality = (
+            self.original_quality
+            if original_quality is None
+            else original_quality
+        )
         container = SimpleNamespace(
             all_data=[],
             template={
@@ -1042,6 +1065,7 @@ class Extractor:
             },
             cache=None,
             same=False,
+            original_quality=original_quality,
         )
         await self.__platform_classify_detail(
             data,
