@@ -47,7 +47,12 @@ def condition_filter(data: dict) -> bool:
     return True
 
 
-async def suspend(count: int, console: "ColorfulConsole") -> None:
+async def suspend(
+    count: int,
+    console: "ColorfulConsole",
+    batches: int = 1,
+    rest_time: int = 30,
+) -> None:
     """
     如需采集大量数据，请启用该函数，可以在处理指定数量的数据后，暂停一段时间，然后继续运行
     batches: 每次处理的数据数量上限，比如：每次处理 10 个数据，就会暂停程序
@@ -56,9 +61,10 @@ async def suspend(count: int, console: "ColorfulConsole") -> None:
     说明: 此处的一个数据代表一个账号或者一个合集，并非代表一个数据包
     """
     # 启用该函数
-    batches = 10  # 根据实际需求修改
+    if batches == 0 or rest_time == 0:
+        return
+
     if not count % batches:
-        rest_time = 60 * 5  # 根据实际需求修改
         console.print(
             _(
                 "程序连续处理了 {batches} 个数据，为了避免请求频率过高导致账号或 IP 被风控，"
