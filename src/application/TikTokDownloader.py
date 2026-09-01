@@ -57,6 +57,8 @@ class TikTokDownloader:
 
     def __init__(
         self,
+        suspend_batches: int = 1,
+        suspend_interval: int = 30,
     ):
         self.rename_compatible()
         self.console = ColorfulConsole(
@@ -75,6 +77,8 @@ class TikTokDownloader:
         self.config = None
         self.option = None
         self.__function_menu = None
+        self.suspend_batches = suspend_batches
+        self.suspend_interval = suspend_interval
 
     @staticmethod
     def rename_compatible():
@@ -417,6 +421,8 @@ class TikTokDownloader:
             console=self.console,
             **self.settings.read(),
             recorder=self.recorder,
+            suspend_batches=self.suspend_batches,
+            suspend_interval=self.suspend_interval,
         )
         MigrateFolder(self.parameter).compatible()
         self.parameter.set_headers_cookie()

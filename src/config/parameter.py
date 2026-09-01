@@ -110,6 +110,8 @@ class Parameter:
         recorder: "DownloadRecorder",
         browser_info: dict,
         browser_info_tiktok: dict,
+        suspend_batches: int = 1,
+        suspend_interval: int = 30,
         timeout=10,
         douyin_platform=True,
         tiktok_platform=True,
@@ -184,6 +186,8 @@ class Parameter:
         self.ffmpeg = self.__generate_ffmpeg_object(ffmpeg)
         self.live_qualities = self.__check_live_qualities(live_qualities)
         self.original_quality = self.check_bool_false(original_quality)
+        self.suspend_batches = suspend_batches
+        self.suspend_interval = suspend_interval
         self.douyin_platform = self.check_bool_true(
             douyin_platform,
         )
