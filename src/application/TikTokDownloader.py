@@ -57,6 +57,8 @@ class TikTokDownloader:
 
     def __init__(
         self,
+        original_quality_mode: str = "config",
+        original_quality_value: bool | None = None,
         suspend_batches: int = 1,
         suspend_interval: int = 30,
     ):
@@ -77,6 +79,8 @@ class TikTokDownloader:
         self.config = None
         self.option = None
         self.__function_menu = None
+        self.original_quality_mode = original_quality_mode
+        self.original_quality_value = original_quality_value
         self.suspend_batches = suspend_batches
         self.suspend_interval = suspend_interval
 
@@ -421,6 +425,8 @@ class TikTokDownloader:
             console=self.console,
             **self.settings.read(),
             recorder=self.recorder,
+            original_quality_mode=self.original_quality_mode,
+            original_quality_value=self.original_quality_value,
             suspend_batches=self.suspend_batches,
             suspend_interval=self.suspend_interval,
         )
