@@ -24,6 +24,7 @@ class Database:
         self.database.row_factory = Row
         self.cursor = await self.database.cursor()
         await self.__create_table()
+        await self.__migrate_download_data()
         await self.__write_default_config()
         await self.__write_default_option()
         await self.database.commit()
@@ -36,7 +37,16 @@ class Database:
             );"""
         )
         await self.database.execute(
-            "CREATE TABLE IF NOT EXISTS download_data (ID TEXT PRIMARY KEY);"
+            """CREATE TABLE IF NOT EXISTS download_data (
+            ID TEXT PRIMARY KEY,
+            author_uid TEXT,
+            author_nickname TEXT,
+            desc TEXT,
+            publish_time INTEGER,
+            publish_time_str TEXT,
+            download_time INTEGER,
+            download_time_str TEXT
+            );"""
         )
         await self.database.execute("""CREATE TABLE IF NOT EXISTS mapping_data (
         ID TEXT PRIMARY KEY,
@@ -48,6 +58,20 @@ class Database:
         VALUE TEXT NOT NULL
         );""")
 
+    async def __migrate_download_data(self):
+        await self.cursor.execute("PRAGMA table_info(download_data)")
+        existing = {row["name"] for row in await self.cursor.fetchall()}
+        for column in self.__download_data_columns():
+            if column not in existing:
+                await self.database.execute(
+                    f"ALTER TABLE download_data ADD COLUMN {column} "
+                    + (
+                        "INTEGER"
+                        if column in ("publish_time", "download_time")
+                        else "TEXT"
+                    )
+                )
+
     async def __write_default_config(self):
         await self.database.execute("""INSERT OR IGNORE INTO config_data (NAME, VALUE)
                             VALUES ('Record', 1),
@@ -57,6 +81,18 @@ class Database:
     async def __write_default_option(self):
         await self.database.execute("""INSERT OR IGNORE INTO option_data (NAME, VALUE)
                             VALUES ('Language', 'zh_CN');""")
+
+    @staticmethod
+    def __download_data_columns() -> tuple[str, ...]:
+        return (
+            "author_uid",
+            "author_nickname",
+            "desc",
+            "publish_time",
+            "publish_time_str",
+            "download_time",
+            "download_time_str",
+        )
 
     async def read_config_data(self):
         await self.cursor.execute("SELECT * FROM config_data")
@@ -103,9 +139,32 @@ class Database:
         await self.cursor.execute("SELECT ID FROM download_data WHERE ID=?", (id_,))
         return bool(await self.cursor.fetchone())
 
-    async def write_download_data(self, id_: str):
+    async def write_download_data(
+        self,
+        id_: str,
+        author_uid: str = "",
+        author_nickname: str = "",
+        desc: str = "",
+        publish_time: int = 0,
+        publish_time_str: str = "",
+        download_time: int = 0,
+        download_time_str: str = "",
+    ):
         await self.database.execute(
-            "INSERT OR IGNORE INTO download_data (ID) VALUES (?);", (id_,)
+            """INSERT OR IGNORE INTO download_data (
+            ID, author_uid, author_nickname, desc,
+            publish_time, publish_time_str, download_time, download_time_str
+            ) VALUES (?,?,?,?,?,?,?,?);""",
+            (
+                id_,
+                author_uid,
+                author_nickname,
+                desc,
+                publish_time,
+                publish_time_str,
+                download_time,
+                download_time_str,
+            ),
         )
         await self.database.commit()
 
