@@ -1,5 +1,6 @@
 from argparse import ArgumentParser, ArgumentTypeError, RawDescriptionHelpFormatter
 from asyncio import CancelledError, run
+from sys import stderr
 from typing import Sequence
 
 
@@ -34,6 +35,7 @@ def create_parser() -> ArgumentParser:
             "示例：\n"
             "  python main.py --help\n"
             "  DouK-Downloader --help\n"
+            "  DouK-Downloader --volume D:\\TikTokData\\Volume\n"
             "  DouK-Downloader --original-quality-mode global --original-quality true --record false\n"
             "  DouK-Downloader --suspend-batches 10 --suspend-interval 300\n"
             "完整参数说明请查阅项目文档。"
@@ -44,6 +46,17 @@ def create_parser() -> ArgumentParser:
         "--help",
         action="help",
         help="显示本帮助信息并退出。",
+    )
+    parser.add_argument(
+        "--volume",
+        metavar="PATH",
+        default=None,
+        help=(
+            "指定本次运行使用的 Volume 数据目录。"
+            "目录不存在时自动创建；相对路径以程序所在目录为基准。"
+            "省略时使用程序所在目录下的 Volume。"
+            "该参数仅对本次运行生效，不写入配置文件。"
+        ),
     )
     parser.add_argument(
         "--original-quality-mode",
@@ -126,6 +139,14 @@ async def main():
     args = parse_arguments()
 
     # 延迟导入，确保 --help 无需加载第三方依赖即可使用。
+    from src.custom import set_volume_path
+
+    try:
+        set_volume_path(args.volume)
+    except (OSError, ValueError, RuntimeError) as error:
+        print(f"无法设置 Volume 目录: {error}", file=stderr)
+        raise SystemExit(1) from error
+
     from src.application import TikTokDownloader
 
     async with TikTokDownloader(

@@ -154,6 +154,7 @@ demo()
 运行 <code>python main.py --help</code>（或 <code>-h</code>）可以查看完整的参数列表、可选值、默认值、说明和示例；<br>
 <code>--original-quality-mode config|global|override</code> 控制 <code>original_quality</code> 的优先级，默认 <code>config</code>；<code>config</code> 使用配置文件和账号级设置，<code>global</code> 使用命令行值覆盖全局配置且账号级设置仍优先，<code>override</code> 强制覆盖包括账号级设置在内的全部配置；<br>
 <code>--original-quality true|false</code> 提供目标值，仅在 <code>global</code> 和 <code>override</code> 模式下必填，兼容 <code>1/0</code> 且不区分大小写；<br>
+<code>--volume PATH</code> 指定本次运行的 Volume 数据目录；目录不存在时自动创建，相对路径以程序所在目录为基准，省略时使用程序所在目录下的 <code>Volume</code>，该参数不会写入配置文件，也不会自动迁移旧数据；<br>
 <code>--record true|false</code> 控制本次运行是否启用作品下载记录，不传时使用配置文件设置；一旦传入，本次运行期间菜单「作品下载记录」将不可切换；<br>
 <code>--suspend-batches 整数</code> 控制批量处理账号/合集时每处理多少个数据后暂停，0 表示禁用，默认 1；<br>
 <code>--suspend-interval 整数</code> 控制暂停秒数，0 表示禁用，默认 30；<br>
@@ -191,6 +192,7 @@ demo()
 </ul>
 <li>创建容器：<code>docker run --name 容器名称(可选) -p 主机端口号:5555 -v tiktok_downloader_volume:/app/Volume -it &lt;镜像名称&gt;</code>
 </li>
+<br>也可以将宿主机目录挂载到其他路径，并在启动命令中通过 <code>--volume</code> 指定：<code>docker run -v /宿主机数据目录:/data -it &lt;镜像名称&gt; --volume /data/Volume</code><br>
 <br><b>注意：</b>此处的 <code>&lt;镜像名称&gt;</code> 需与您在第一步中使用的镜像名称保持一致（例如 <code>joeanamier/tiktok-downloader</code> 或 <code>ghcr.io/joeanamier/tiktok-downloader</code>）
 <li>运行容器
 <ul>

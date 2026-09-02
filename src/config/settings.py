@@ -5,7 +5,7 @@ from shutil import move
 from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
-from ..custom import IMPERSONATE
+from ..custom import IMPERSONATE, is_custom_volume
 from ..translation import _
 
 if TYPE_CHECKING:
@@ -229,6 +229,8 @@ class Settings:
         return data
 
     def compatible(self):
+        if is_custom_volume():
+            return
         if (
             old := self.root.parent.joinpath(self.file)
         ).exists() and not self.path.exists():

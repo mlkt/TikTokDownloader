@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from src.config import Settings
-from src.custom import VERSION_BETA, VOLUME
+from src.custom import VERSION_BETA, get_volume
 from src.tools import ColorfulConsole
 from src.translation import _
 
@@ -13,7 +13,7 @@ class Write:
         self.console = ColorfulConsole(
             debug=VERSION_BETA,
         )
-        self.settings = Settings(VOLUME, self.console)
+        self.settings = Settings(get_volume(), self.console)
         self.data = self.settings.read()
 
     def run(self):

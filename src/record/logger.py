@@ -11,6 +11,7 @@ from ..custom import (
     ERROR,
     INFO,
     WARNING,
+    is_custom_volume,
 )
 from .base import BaseLogger
 
@@ -74,6 +75,8 @@ class LoggerManager(BaseLogger):
         self,
         path: Path,
     ):
+        if is_custom_volume():
+            return
         if (
             old := self._root.parent.joinpath(self._folder)
         ).exists() and not path.exists():

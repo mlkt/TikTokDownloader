@@ -8,7 +8,9 @@ from .function import (
 from .internal import (
     DISCLAIMER_TEXT,
     ROOT,
-    VOLUME,
+    get_volume,
+    is_custom_volume,
+    set_volume_path,
     VERSION_MAJOR,
     VERSION_MINOR,
     VERSION_BETA,
@@ -71,3 +73,10 @@ from .static import (
     FILE_SIGNATURES,
     FILE_SIGNATURES_LENGTH,
 )
+
+
+# 兼容旧代码中的 `from src.custom import VOLUME`，同时避免导入时提前创建默认目录。
+def __getattr__(name: str):
+    if name == "VOLUME":
+        return get_volume()
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")

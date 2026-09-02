@@ -6,8 +6,46 @@ ROOT = (
     if getattr(sys, "frozen", False)
     else Path(__file__).resolve().parent.parent.parent
 )
-VOLUME = ROOT.joinpath("Volume")
-VOLUME.mkdir(exist_ok=True)
+
+_VOLUME_PATH: Path | None = None
+_CUSTOM_VOLUME = False
+
+
+def get_volume() -> Path:
+    """返回当前 Volume 目录，并在首次访问时自动创建。"""
+    global _VOLUME_PATH
+    if _VOLUME_PATH is None:
+        _VOLUME_PATH = ROOT.joinpath("Volume")
+    _VOLUME_PATH.mkdir(parents=True, exist_ok=True)
+    return _VOLUME_PATH
+
+
+def set_volume_path(path: str | Path | None) -> Path:
+    """设置 Volume 目录。传入 None 时恢复默认程序根目录下的 Volume。"""
+    global _CUSTOM_VOLUME, _VOLUME_PATH
+    if path is None:
+        volume_path = ROOT.joinpath("Volume")
+    else:
+        if not str(path).strip():
+            raise ValueError("Volume 路径不能为空")
+        volume_path = Path(path).expanduser()
+        if not volume_path.is_absolute():
+            volume_path = ROOT / volume_path
+        volume_path = volume_path.resolve()
+        if volume_path.exists() and not volume_path.is_dir():
+            raise ValueError(f"指定的路径不是目录：{volume_path}")
+
+    volume_path.mkdir(parents=True, exist_ok=True)
+    _VOLUME_PATH = volume_path
+    _CUSTOM_VOLUME = path is not None
+    return _VOLUME_PATH
+
+
+def is_custom_volume() -> bool:
+    """返回当前 Volume 路径是否由用户显式指定。"""
+    return _CUSTOM_VOLUME
+
+
 VERSION_MAJOR = 5
 VERSION_MINOR = 8
 VERSION_BETA = True

@@ -18,7 +18,8 @@ from ..custom import (
     PARAMS_HEADERS_TIKTOK,
     QRCODE_HEADERS,
     TIMEOUT,
-    VOLUME,
+    get_volume,
+    is_custom_volume,
 )
 from ..encrypt import (
     DouYinParams,
@@ -121,9 +122,10 @@ class Parameter:
     ):
         self.settings = settings
         self.cookie_object = cookie_object
-        self.ROOT = VOLUME  # 项目根路径
-        self.cache = VOLUME.joinpath("Cache")  # 缓存路径
-        self.logger = logger(VOLUME, console)
+        volume = get_volume()  # 项目根路径
+        self.ROOT = volume
+        self.cache = volume.joinpath("Cache")  # 缓存路径
+        self.logger = logger(volume, console)
         self.logger.run()
         self.douyin_params, self.tiktok_params = self.check_objects_from_external_py(
             console
@@ -1235,6 +1237,8 @@ class Parameter:
         return f"{key}={value}" if return_key else value
 
     def compatible(self):
+        if is_custom_volume():
+            return
         if (
             old := self.ROOT.parent.joinpath("Cache")
         ).exists() and not self.cache.exists():

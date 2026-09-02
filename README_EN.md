@@ -156,6 +156,7 @@ demo()
 Run <code>python main.py --help</code> (or <code>-h</code>) to display the complete list of options, accepted values, defaults, descriptions, and examples;<br>
 <code>--original-quality-mode config|global|override</code> controls the priority of <code>original_quality</code>, default <code>config</code>; <code>config</code> uses the configuration file and account-level settings, <code>global</code> overrides the global configuration while account-level settings still take priority, and <code>override</code> overrides all settings including account-level values;<br>
 <code>--original-quality true|false</code> provides the target value, required only in <code>global</code> and <code>override</code> modes; values <code>1/0</code> are accepted and matching is case-insensitive;<br>
+<code>--volume PATH</code> specifies the Volume data directory for this run; it is created automatically when missing, relative paths are resolved against the program directory, and omitting it uses <code>Volume</code> under the program directory. This option is not written to the configuration file and does not migrate existing data automatically.<br>
 <code>--record true|false</code> controls whether download history is enabled for this run; when omitted, the config file setting is used. Once provided, the menu "作品下载记录" cannot be toggled during this run;<br>
 <code>--suspend-batches integer</code> controls how many accounts/collections are processed between pauses, 0 disables pauses, default 1;<br>
 <code>--suspend-interval integer</code> controls the pause duration in seconds, 0 disables pauses, default 30;<br>
@@ -192,6 +193,7 @@ Example: <code>python main.py --original-quality-mode global --original-quality 
 <li>Method 3: Pull the image using the command <code>docker pull ghcr.io/joeanamier/tiktok-downloader</code>.</li>
 </ul>
 <li>Create the container: <code>docker run --name ContainerName(optional) -p HostPort:5555 -v tiktok_downloader_volume:/app/Volume -it &lt;image name&gt;</code>.</li>
+<br>You can also mount a host directory to another path and specify it at startup with <code>--volume</code>: <code>docker run -v /host/data:/data -it &lt;image name&gt; --volume /data/Volume</code><br>
 <br><b>Note:</b> The <code>&lt;image name&gt;</code> here must be consistent with the image name you used in the first step (<code>joeanamier/tiktok-downloader</code> or <code>ghcr.io/joeanamier/tiktok-downloader</code>)
 <li>Run the container
 <ul>

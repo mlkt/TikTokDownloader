@@ -1,6 +1,8 @@
 from shutil import move
 from typing import TYPE_CHECKING
 
+from ..custom import is_custom_volume
+
 from .csv import CSVLogger
 from .sqlite import SQLLogger
 from .text import BaseTextLogger
@@ -645,5 +647,7 @@ class RecordManager:
         path: "Path",
         name: str,
     ):
+        if is_custom_volume():
+            return
         if (old := root.parent.joinpath(name)).exists() and not path.exists():
             move(old, path)

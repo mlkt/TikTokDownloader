@@ -7,7 +7,7 @@ from src.custom import (
     DOWNLOAD_HEADERS_TIKTOK,
     IMPERSONATE,
     USERAGENT,
-    VOLUME,
+    get_volume,
 )
 from src.encrypt import DouYinParams, TikTokParams
 from src.testers.logger import Logger
@@ -15,10 +15,10 @@ from src.tools import Cleaner, ColorfulConsole, create_client
 
 
 class Params:
-    CONFIG = VOLUME.joinpath("test_cookie.ini")
     CLEANER = Cleaner()
 
     def __init__(self):
+        self.CONFIG = get_volume().joinpath("test_cookie.ini")
         self.cookie_str = ""
         self.cookie_str_tiktok = ""
         self.uifid = ""

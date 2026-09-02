@@ -1,6 +1,8 @@
 from shutil import move
 from typing import TYPE_CHECKING
 
+from ..custom import is_custom_volume
+
 if TYPE_CHECKING:
     from ..config import Parameter
 
@@ -15,6 +17,8 @@ class MigrateFolder:
         self.folder = parameter.folder_name
 
     def compatible(self):
+        if is_custom_volume():
+            return
         for i in (
             "Music",
             "Data",
