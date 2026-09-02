@@ -5,6 +5,8 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
+from curl_cffi.requests.exceptions import RequestException
+
 from ..custom import (
     AUTHOR_COVER_INDEX,
     AUTHOR_COVER_URL_INDEX,
@@ -28,8 +30,9 @@ from ..custom import (
     VIDEO_INDEX,
     VIDEO_TIKTOK_INDEX,
     condition_filter,
+    wait,
 )
-from ..tools import DownloaderError
+from ..tools import DownloaderError, Retry
 from ..translation import _
 
 if TYPE_CHECKING:
@@ -78,6 +81,8 @@ class Extractor:
         self.date_format: str = params.date_format
         self.cleaner = params.CLEANER
         self.original_quality: bool = params.original_quality
+        self.client = params.client
+        self.max_retry = params.max_retry
         self.type: dict = {
             "batch": self.__batch,
             "detail": self.__detail,
@@ -491,11 +496,6 @@ class Extractor:
     ) -> None:
         item = container.cache
         item["type"] = type_
-        item["original_quality"] = (
-            container.original_quality
-            if container is not None
-            else self.original_quality
-        )
         (
             item["height"],
             item["width"],
@@ -503,6 +503,7 @@ class Extractor:
         ) = await self.__extract_video_download(
             data,
             container=container,
+            use_original_quality=True,
         )
         item["duration"] = self.time_conversion(
             self.safe_extract(data, "video.duration", 0)
@@ -526,6 +527,7 @@ class Extractor:
         self,
         data: SimpleNamespace,
         container: SimpleNamespace | None = None,
+        use_original_quality: bool = False,
     ) -> tuple[int, int, str]:
         bit_rate: list[SimpleNamespace] = self.safe_extract(
             data,
@@ -586,9 +588,37 @@ class Extractor:
                 bit_rate[0],
                 f"play_addr.url_list[{VIDEO_INDEX}]",
             )
-        if container is not None:
-            container.cache["bitrate_size"] = bitrate_size
+        original_quality = (
+            getattr(container, "original_quality", self.original_quality)
+            if container is not None
+            else self.original_quality
+        )
+        if use_original_quality and original_quality:
+            uri = self.safe_extract(data, "video.play_addr.uri")
+            if uri:
+                original_url = self.generate_original_quality_url(uri)
+                if result := await self.__request_video_size(original_url):
+                    original_size, original_url = result
+                    if original_size >= bitrate_size:
+                        url = original_url
         return height, width, url
+
+    @Retry.retry
+    async def __request_video_size(self, url: str) -> tuple[int, str] | None:
+        try:
+            response = await self.client.get(
+                url,
+                headers={"Range": "bytes=0-0"},
+            )
+            await wait()
+            response.raise_for_status()
+            content_range = response.headers.get("Content-Range", "")
+            if "/" not in content_range:
+                return None
+            size = int(content_range.rsplit("/", 1)[1])
+            return (size, str(response.url)) if size else None
+        except (RequestException, TypeError, ValueError):
+            return None
 
     def __extract_video_info_tiktok(
         self,
@@ -1601,3 +1631,7 @@ class Extractor:
             self.safe_extract(data, "duration", 0)
         )
         container.all_data.append(container.cache)
+
+    @staticmethod
+    def generate_original_quality_url(uri: str) -> str:
+        return f"https://www.douyin.com/aweme/v1/play/?video_id={uri}&ratio=default"

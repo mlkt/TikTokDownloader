@@ -408,38 +408,6 @@ class Downloader:
     async def is_skip(self, id_: str, path: Path) -> bool:
         return await self.is_downloaded(id_) or self.is_exists(path)
 
-    @staticmethod
-    def generate_original_quality_url(uri: str) -> str:
-        return f"https://www.douyin.com/aweme/v1/play/?video_id={uri}&ratio=default"
-
-    async def __request_video_size(self, url: str) -> tuple[int, str] | None:
-        try:
-            response = await self.client.get(
-                url,
-                headers={"Range": "bytes=0-0"},
-            )
-            response.raise_for_status()
-            content_range = response.headers.get("Content-Range", "")
-            if "/" not in content_range:
-                return None
-            size = int(content_range.rsplit("/", 1)[1])
-            return (size, str(response.url)) if size else None
-        except (RequestException, TypeError, ValueError):
-            return None
-
-    async def resolve_original_quality_download(self, item: dict) -> str:
-        if not item.get("original_quality"):
-            return item["downloads"]
-        uri = item.get("uri")
-        if not uri:
-            return item["downloads"]
-        original_url = self.generate_original_quality_url(uri)
-        if result := await self.__request_video_size(original_url):
-            original_size, original_url = result
-            if original_size >= (item.get("bitrate_size") or 0):
-                return original_url
-        return item["downloads"]
-
     async def download_image(
         self,
         tasks: list,
@@ -527,7 +495,6 @@ class Downloader:
             self.log.info(f"文件路径: {p.resolve()}", False)
             skipped.add(id_)
             return
-        item["downloads"] = await self.resolve_original_quality_download(item)
         tasks.append(
             (
                 item["downloads"],
