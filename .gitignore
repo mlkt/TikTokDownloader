@@ -6,3 +6,6 @@ __pycache__/
 /.run/
 /Volume/
 !/.github/
+
+/dist/
+/src/DouK_Downloader.egg-info/
