@@ -150,6 +150,11 @@ demo()
 <li>运行 <code>uv sync --no-dev</code> 命令同步环境依赖</li>
 <li>运行 <code>uv run main.py</code> 命令启动 DouK-Downloader</li>
 </ol>
+<p><b>命令行参数</b><br>
+运行 <code>python main.py --help</code>（或 <code>-h</code>）可以查看完整的参数列表、可选值、默认值、说明和示例；<br>
+<code>--suspend-batches 整数</code> 控制批量处理账号/合集时每处理多少个数据后暂停，0 表示禁用，默认 1；<br>
+<code>--suspend-interval 整数</code> 控制暂停秒数，0 表示禁用，默认 30；<br>
+示例：<code>python main.py --suspend-batches 10 --suspend-interval 300</code></p>
 </ol>
 </li>
 <li>阅读 DouK-Downloader 的免责声明，根据提示输入内容</li>

@@ -5,7 +5,7 @@ from types import SimpleNamespace
 from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
-from curl_cffi.requests.exceptions import HTTPError, RequestException
+from curl_cffi.requests.exceptions import RequestException
 
 from ..custom import (
     AUTHOR_COVER_INDEX,
@@ -588,7 +588,6 @@ class Extractor:
 
     @Retry.retry
     async def __request_video_size(self, url: str) -> tuple[int, str] | None:
-        content_range = None
         try:
             response = await self.client.get(
                 url,
@@ -597,26 +596,11 @@ class Extractor:
             await wait()
             response.raise_for_status()
             content_range = response.headers.get("Content-Range", "")
-            if (
-                len(
-                    r := content_range.rsplit(
-                        "/",
-                    )
-                )
-                != 2
-            ):
-                raise ValueError
-            size = int(r[-1])
-            return size, response.url
-        except HTTPError:
-            return -1, ""
-        except ValueError:
-            self.log.warning("解析最高质量下载链接失败！")
-            self.log.warning(f"Url: {url}, Content-Range: {content_range}", False)
-            return -1, ""
-        except RequestException as e:
-            self.log.warning("获取最高质量下载链接失败！")
-            self.log.warning(f"Url: {url}, Error: {e}", False)
+            if "/" not in content_range:
+                return None
+            size = int(content_range.rsplit("/", 1)[1])
+            return (size, str(response.url)) if size else None
+        except (RequestException, TypeError, ValueError):
             return None
 
     def __extract_video_info_tiktok(
