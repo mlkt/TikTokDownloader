@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Type
 from curl_cffi.requests import get
 from curl_cffi.requests.exceptions import RequestException, Timeout
 
+from ..cli_edition import CLI
 from ..custom import (
     BLANK_PREVIEW,
     DATA_HEADERS,
@@ -184,6 +185,8 @@ class Parameter:
         self.ffmpeg = self.__generate_ffmpeg_object(ffmpeg)
         self.live_qualities = self.__check_live_qualities(live_qualities)
         self.original_quality = self.check_bool_false(original_quality)
+        self.suspend_batches = CLI.suspend_batches
+        self.suspend_interval = CLI.suspend_interval
         self.douyin_platform = self.check_bool_true(
             douyin_platform,
         )

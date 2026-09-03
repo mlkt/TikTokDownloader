@@ -152,6 +152,11 @@ demo()
 <li>Run the command <code>uv sync --no-dev</code> to synchronize environment dependencies</li>
 <li>Run the command <code>uv run main.py</code> to start DouK-Downloader</li>
 </ol>
+<p><b>Command-line options</b><br>
+Run <code>python main.py --help</code> (or <code>-h</code>) to display the complete list of options, accepted values, defaults, descriptions, and examples;<br>
+<code>--suspend-batches integer</code> controls how many accounts/collections are processed between pauses, 0 disables pauses, default 1;<br>
+<code>--suspend-interval integer</code> controls the pause duration in seconds, 0 disables pauses, default 30;<br>
+Example: <code>python main.py --suspend-batches 10 --suspend-interval 300</code></p>
 </ol>
 </li>
 <li>Read the disclaimer of DouK-Downloader and enter content according to the prompt.</li>
