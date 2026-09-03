@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Type
 from curl_cffi.requests import get
 from curl_cffi.requests.exceptions import RequestException, Timeout
 
+from ..cli_edition import CLI
 from ..custom import (
     BLANK_PREVIEW,
     DATA_HEADERS,
@@ -110,10 +111,6 @@ class Parameter:
         recorder: "DownloadRecorder",
         browser_info: dict,
         browser_info_tiktok: dict,
-        original_quality_mode: str = "config",
-        original_quality_value: bool | None = None,
-        suspend_batches: int = 1,
-        suspend_interval: int = 30,
         timeout=10,
         douyin_platform=True,
         tiktok_platform=True,
@@ -190,13 +187,13 @@ class Parameter:
         config_original_quality = self.check_bool_false(original_quality)
         self.original_quality_config = config_original_quality
         self.original_quality_mode = (
-            original_quality_mode
-            if original_quality_mode in {"config", "global", "override"}
+            CLI.original_quality_mode
+            if CLI.original_quality_mode in {"config", "global", "override"}
             else "config"
         )
         self.original_quality_value = (
-            original_quality_value
-            if isinstance(original_quality_value, bool)
+            CLI.original_quality_value
+            if isinstance(CLI.original_quality_value, bool)
             else None
         )
         self.original_quality = self.resolve_original_quality_values(
@@ -204,8 +201,8 @@ class Parameter:
             self.original_quality_value,
             config_original_quality,
         )
-        self.suspend_batches = suspend_batches
-        self.suspend_interval = suspend_interval
+        self.suspend_batches = CLI.suspend_batches
+        self.suspend_interval = CLI.suspend_interval
         self.douyin_platform = self.check_bool_true(
             douyin_platform,
         )

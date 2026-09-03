@@ -6,6 +6,7 @@ from curl_cffi.requests import get
 from curl_cffi.requests.exceptions import RequestException
 
 from src.config import Parameter, Settings
+from src.cli_edition import CLI
 from src.custom import (
     COOKIE_UPDATE_INTERVAL,
     DISCLAIMER_TEXT,
@@ -55,14 +56,7 @@ class TikTokDownloader:
     WIDTH = 50
     LINE = ">" * WIDTH
 
-    def __init__(
-        self,
-        original_quality_mode: str = "config",
-        original_quality_value: bool | None = None,
-        record: bool | None = None,
-        suspend_batches: int = 1,
-        suspend_interval: int = 30,
-    ):
+    def __init__(self):
         self.rename_compatible()
         self.console = ColorfulConsole(
             debug=self.VERSION_BETA,
@@ -80,11 +74,7 @@ class TikTokDownloader:
         self.config = None
         self.option = None
         self.__function_menu = None
-        self.original_quality_mode = original_quality_mode
-        self.original_quality_value = original_quality_value
-        self.record_override = record
-        self.suspend_batches = suspend_batches
-        self.suspend_interval = suspend_interval
+        self.record_override = CLI.record
 
     @staticmethod
     def rename_compatible():
@@ -435,10 +425,6 @@ class TikTokDownloader:
             console=self.console,
             **self.settings.read(),
             recorder=self.recorder,
-            original_quality_mode=self.original_quality_mode,
-            original_quality_value=self.original_quality_value,
-            suspend_batches=self.suspend_batches,
-            suspend_interval=self.suspend_interval,
         )
         MigrateFolder(self.parameter).compatible()
         self.parameter.set_headers_cookie()
