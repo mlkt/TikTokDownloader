@@ -14,11 +14,21 @@ __all__ = [
 
 @dataclass
 class CliOptions:
+    original_quality_mode: str = "config"
+    original_quality_value: bool | None = None
     suspend_batches: int = 1
     suspend_interval: int = 30
 
 
 CLI = CliOptions()
+
+
+def parse_boolean(value: str) -> bool:
+    if value.lower() in {"true", "1"}:
+        return True
+    if value.lower() in {"false", "0"}:
+        return False
+    raise ArgumentTypeError(f"布尔值无效: {value}")
 
 
 def parse_non_negative_integer(value: str) -> int:
@@ -44,6 +54,7 @@ def create_parser() -> ArgumentParser:
             "示例：\n"
             "  python main.py --help\n"
             "  DouK-Downloader --help\n"
+            "  DouK-Downloader --original-quality-mode global --original-quality true\n"
             "  DouK-Downloader --suspend-batches 10 --suspend-interval 300\n"
             "完整参数说明请查阅项目文档。"
         ),
@@ -53,6 +64,30 @@ def create_parser() -> ArgumentParser:
         "--help",
         action="help",
         help="显示本帮助信息并退出。",
+    )
+    parser.add_argument(
+        "--original-quality-mode",
+        choices=("config", "global", "override"),
+        default="config",
+        help=(
+            "original_quality 优先级模式。"
+            "可选值：config（默认，使用配置文件和账号级设置）、"
+            "global（使用命令行值覆盖全局配置，账号级设置仍优先）、"
+            "override（强制覆盖包括账号级设置在内的全部配置）。"
+            "默认：config。"
+        ),
+    )
+    parser.add_argument(
+        "--original-quality",
+        type=parse_boolean,
+        metavar="{true,false}",
+        default=None,
+        help=(
+            "original_quality 目标值，仅在 global/override 模式下必填。"
+            "可选值：true、false（兼容 1、0，不区分大小写）。"
+            "true 表示优先下载原画/最高画质，false 表示不强制原画。"
+            "默认：未设置。"
+        ),
     )
     parser.add_argument(
         "--suspend-batches",
@@ -84,7 +119,18 @@ def parse_arguments(
 ) -> CliOptions:
     parser = create_parser()
     args, _ = parser.parse_known_args(argv)
+    if args.original_quality_mode == "config" and args.original_quality is not None:
+        parser.error("--original-quality 只能在 global/override 模式下使用")
+    if (
+        args.original_quality_mode in {"global", "override"}
+        and args.original_quality is None
+    ):
+        parser.error(
+            "--original-quality-mode 为 global/override 时必须提供 --original-quality"
+        )
     return CliOptions(
+        original_quality_mode=args.original_quality_mode,
+        original_quality_value=args.original_quality,
         suspend_batches=args.suspend_batches,
         suspend_interval=args.suspend_interval,
     )
