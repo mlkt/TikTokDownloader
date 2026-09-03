@@ -254,7 +254,7 @@ built with gcc 14.2.0 (crosstool-NG 1.27.0.18_7458341)
 <p>本项目支持抖音平台和 TikTok 平台的数据采集和文件下载功能，平台功能默认开启，如果不需要使用平台的任何功能，可以编辑配置文件关闭平台功能。</p>
 <p>本项目内置参数更新机制，程序会周期性更新抖音与 TikTok 请求的部分参数，以保持参数的有效性（或许没有效果？），该功能无法防止参数失效，参数失效后需要重新写入 Cookie；关闭平台功能后，对应平台的参数更新功能将会禁用！</p>
 <h1>配置文件</h1>
-<p>配置文件：项目根目录下的 <code>./Volume/settings.json</code> 文件，可以自定义设置程序部分运行参数。</p>
+<p>配置文件：项目根目录下的 <code>./Volume/settings.json</code> 文件，可以自定义设置程序部分运行参数；也可通过命令行参数 <code>--volume PATH</code> 自定义 Volume 数据目录，相对路径按启动时的当前工作目录解析，省略时使用项目根目录下的 <code>Volume</code>。</p>
 <p>若无特殊需求，大部分配置参数无需修改，直接使用默认值即可。</p>
 <p><b><code>cookie</code>、<code>cookie_tiktok</code> 与 <code>device_id</code>参数为必需参数，必须设置该参数才能正常使用程序</b>；其余参数可以根据实际需求进行修改！</p>
 <p>如果您的计算机没有合适的程序编辑 JSON 文件，建议使用 <a href="https://www.toolhelper.cn/JSON/JSONFormat">在线工具</a> 编辑配置文件内容，修改后需要重启软件才能生效。</p>

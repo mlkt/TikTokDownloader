@@ -1,5 +1,7 @@
+import sys
 from argparse import ArgumentParser, ArgumentTypeError, RawDescriptionHelpFormatter
 from dataclasses import dataclass, fields
+from pathlib import Path
 from typing import Sequence
 
 __all__ = [
@@ -9,11 +11,29 @@ __all__ = [
     "parse_arguments",
     "load_arguments",
     "reset_options",
+    "ROOT",
+    "resolve_volume_path",
 ]
+
+ROOT = (
+    Path(sys.executable).resolve().parent
+    if getattr(sys, "frozen", False)
+    else Path(__file__).resolve().parent.parent.parent
+)
+
+
+def resolve_volume_path(value: str | Path | None = None) -> Path:
+    if not value:
+        return ROOT.joinpath("Volume")
+    path = Path(value).expanduser()
+    if not path.is_absolute():
+        path = Path.cwd().joinpath(path)
+    return path.resolve()
 
 
 @dataclass
 class CliOptions:
+    volume: Path = ROOT.joinpath("Volume")
     original_quality_mode: str = "config"
     original_quality_value: bool | None = None
     record: bool | None = None
@@ -65,6 +85,17 @@ def create_parser() -> ArgumentParser:
         "--help",
         action="help",
         help="显示本帮助信息并退出。",
+    )
+    parser.add_argument(
+        "--volume",
+        type=str,
+        metavar="PATH",
+        default=None,
+        help=(
+            "指定 Volume 数据目录，包含配置文件、数据库、缓存和日志。"
+            "相对路径以启动时的当前工作目录为基准；省略时使用程序文件目录下的 Volume。"
+            "默认：程序文件目录/Volume。"
+        ),
     )
     parser.add_argument(
         "--original-quality-mode",
@@ -133,6 +164,7 @@ def parse_arguments(
 ) -> CliOptions:
     parser = create_parser()
     args, _ = parser.parse_known_args(argv)
+    volume = resolve_volume_path(args.volume)
     if args.original_quality_mode == "config" and args.original_quality is not None:
         parser.error("--original-quality 只能在 global/override 模式下使用")
     if (
@@ -143,6 +175,7 @@ def parse_arguments(
             "--original-quality-mode 为 global/override 时必须提供 --original-quality"
         )
     return CliOptions(
+        volume=volume,
         original_quality_mode=args.original_quality_mode,
         original_quality_value=args.original_quality,
         record=args.record,
