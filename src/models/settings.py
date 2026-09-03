@@ -10,6 +10,7 @@ class AccountUrl(BaseModel):
     earliest: str | int | float = ""
     latest: str | int | float = ""
     enable: bool = True
+    original_quality: bool | None = None
 
 
 class MixUrl(BaseModel):

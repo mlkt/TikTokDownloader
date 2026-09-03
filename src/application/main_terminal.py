@@ -556,6 +556,7 @@ class TikTok:
         earliest="",
         latest="",
         pages: int = None,
+        original_quality: bool | None = None,
         api=False,
         source=False,
         cookie: str = None,
@@ -624,6 +625,7 @@ class TikTok:
             tiktok=tiktok,
             mode=tab or "post",
             info=info,
+            original_quality=original_quality,
         )
 
     async def _get_account_data(
@@ -740,8 +742,10 @@ class TikTok:
         mix_title: str = "",
         collect_id: str = "",
         collect_name: str = "",
+        original_quality: bool | None = None,
     ):
         self.logger.info(_("开始提取作品数据"))
+        original_quality = self.parameter.resolve_original_quality(original_quality)
         id_, name, mark = self.extractor.preprocessing_data(
             info or data,
             tiktok,
@@ -791,6 +795,7 @@ class TikTok:
                     "post",
                     "mix",
                 },
+                original_quality=original_quality,
             )
         if api:
             return data
