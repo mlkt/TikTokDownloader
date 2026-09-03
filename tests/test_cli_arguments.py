@@ -1,6 +1,14 @@
 import pytest
+from dataclasses import fields
 
-from src.cli_edition import CLI, CliOptions, load_arguments, parse_arguments, reset_options
+from src.cli_edition import (
+    CLI,
+    CliOptions,
+    ROOT,
+    load_arguments,
+    parse_arguments,
+    reset_options,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -87,6 +95,36 @@ def test_load_arguments_updates_global_cli():
 
     assert CLI.record is False
     assert CLI.suspend_batches == 10
+
+
+def test_volume_default():
+    options = parse_arguments([])
+
+    assert options.volume == ROOT / "Volume"
+
+
+def test_volume_field_is_first():
+    assert fields(CliOptions)[0].name == "volume"
+
+
+def test_parse_volume_argument(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    options = parse_arguments(["--volume", "data/v1"])
+
+    assert options.volume == (tmp_path / "data/v1").resolve()
+
+
+def test_empty_volume_treated_as_unset():
+    options = parse_arguments(["--volume", ""])
+
+    assert options.volume == ROOT / "Volume"
+
+
+def test_load_arguments_updates_volume(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    load_arguments(["--volume", "custom"])
+
+    assert CLI.volume == (tmp_path / "custom").resolve()
 
 
 def test_failed_load_does_not_overwrite_global_cli():

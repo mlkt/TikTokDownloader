@@ -1,13 +1,9 @@
-import sys
-from pathlib import Path
+from ..cli_edition import CLI, ROOT as ROOT
 
-ROOT = (
-    Path(sys.executable).resolve().parent
-    if getattr(sys, "frozen", False)
-    else Path(__file__).resolve().parent.parent.parent
-)
-VOLUME = ROOT.joinpath("Volume")
-VOLUME.mkdir(exist_ok=True)
+# 注意：本模块必须在 main.py 的 load_arguments() 之后首次导入，
+# 此时 CLI.volume 才包含命令行解析结果。
+VOLUME = CLI.volume
+VOLUME.mkdir(parents=True, exist_ok=True)
 VERSION_MAJOR = 5
 VERSION_MINOR = 8
 VERSION_BETA = True
