@@ -23,6 +23,8 @@ def test_parse_arguments_values():
             "global",
             "--original-quality",
             "true",
+            "--record",
+            "false",
             "--suspend-batches",
             "10",
             "--suspend-interval",
@@ -32,6 +34,7 @@ def test_parse_arguments_values():
 
     assert options.original_quality_mode == "global"
     assert options.original_quality_value is True
+    assert options.record is False
     assert options.suspend_batches == 10
     assert options.suspend_interval == 300
 
@@ -46,17 +49,10 @@ def test_parse_arguments_values():
         ("0", False),
     ],
 )
-def test_original_quality_boolean_parsing(value, expected):
-    options = parse_arguments(
-        [
-            "--original-quality-mode",
-            "override",
-            "--original-quality",
-            value,
-        ]
-    )
+def test_record_boolean_parsing(value, expected):
+    options = parse_arguments(["--record", value])
 
-    assert options.original_quality_value is expected
+    assert options.record is expected
 
 
 def test_original_quality_with_config_mode_rejected():
@@ -69,6 +65,11 @@ def test_global_mode_requires_original_quality():
         parse_arguments(["--original-quality-mode", "global"])
 
 
+def test_invalid_boolean_rejected():
+    with pytest.raises(SystemExit):
+        parse_arguments(["--record", "invalid"])
+
+
 def test_invalid_non_negative_integer_rejected():
     with pytest.raises(SystemExit):
         parse_arguments(["--suspend-batches", "invalid"])
@@ -77,32 +78,21 @@ def test_invalid_non_negative_integer_rejected():
 def test_load_arguments_updates_global_cli():
     load_arguments(
         [
-            "--original-quality-mode",
-            "global",
-            "--original-quality",
-            "true",
+            "--record",
+            "false",
             "--suspend-batches",
             "10",
         ]
     )
 
-    assert CLI.original_quality_mode == "global"
-    assert CLI.original_quality_value is True
+    assert CLI.record is False
     assert CLI.suspend_batches == 10
 
 
 def test_failed_load_does_not_overwrite_global_cli():
-    load_arguments(["--original-quality-mode", "global", "--original-quality", "true"])
+    load_arguments(["--record", "false"])
 
     with pytest.raises(SystemExit):
         load_arguments(["--original-quality", "true"])
 
-    assert CLI.original_quality_value is True
-
-
-def test_reset_options_restores_defaults():
-    load_arguments(["--original-quality-mode", "global", "--original-quality", "true"])
-
-    reset_options()
-
-    assert CLI == CliOptions()
+    assert CLI.record is False
