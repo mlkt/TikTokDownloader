@@ -55,9 +55,7 @@ class TikTokDownloader:
     WIDTH = 50
     LINE = ">" * WIDTH
 
-    def __init__(
-        self,
-    ):
+    def __init__(self):
         self.rename_compatible()
         self.console = ColorfulConsole(
             debug=self.VERSION_BETA,
