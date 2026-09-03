@@ -695,6 +695,7 @@ class APIServer(TikTok):
             tiktok=tiktok,
             cursor=extract.cursor,
             count=extract.count,
+            original_quality=extract.original_quality,
         ):
             return self.success_response(extract, data)
         return self.failed_response(extract)

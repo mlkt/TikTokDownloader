@@ -27,6 +27,7 @@ class Settings:
                 "earliest": "",
                 "latest": "",
                 "enable": True,
+                "original_quality": None,
             },
         ],
         "accounts_urls_tiktok": [
@@ -37,6 +38,7 @@ class Settings:
                 "earliest": "",
                 "latest": "",
                 "enable": True,
+                "original_quality": None,
             },
         ],
         "mix_urls": [

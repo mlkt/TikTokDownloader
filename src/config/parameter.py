@@ -184,7 +184,23 @@ class Parameter:
         self.run_command = self.__check_run_command(run_command)
         self.ffmpeg = self.__generate_ffmpeg_object(ffmpeg)
         self.live_qualities = self.__check_live_qualities(live_qualities)
-        self.original_quality = self.check_bool_false(original_quality)
+        config_original_quality = self.check_bool_false(original_quality)
+        self.original_quality_config = config_original_quality
+        self.original_quality_mode = (
+            CLI.original_quality_mode
+            if CLI.original_quality_mode in {"config", "global", "override"}
+            else "config"
+        )
+        self.original_quality_value = (
+            CLI.original_quality_value
+            if isinstance(CLI.original_quality_value, bool)
+            else None
+        )
+        self.original_quality = self.resolve_original_quality_values(
+            self.original_quality_mode,
+            self.original_quality_value,
+            config_original_quality,
+        )
         self.suspend_batches = CLI.suspend_batches
         self.suspend_interval = CLI.suspend_interval
         self.douyin_platform = self.check_bool_true(
@@ -286,6 +302,32 @@ class Parameter:
         value: bool,
     ) -> bool:
         return value if isinstance(value, bool) else True
+
+    @staticmethod
+    def resolve_original_quality_values(
+        mode: str,
+        value: bool | None,
+        global_value: bool,
+        account_value: bool | None = None,
+    ) -> bool:
+        if mode == "override":
+            return value if isinstance(value, bool) else global_value
+        if isinstance(account_value, bool):
+            return account_value
+        if mode == "global" and isinstance(value, bool):
+            return value
+        return global_value
+
+    def resolve_original_quality(
+        self,
+        account_value: bool | None = None,
+    ) -> bool:
+        return self.resolve_original_quality_values(
+            self.original_quality_mode,
+            self.original_quality_value,
+            self.original_quality_config,
+            account_value,
+        )
 
     def __check_cookie_tiktok(
         self,
@@ -871,7 +913,7 @@ class Parameter:
             "max_pages": self.max_pages,
             "run_command": " ".join(self.run_command[::-1]),
             "ffmpeg": self.ffmpeg.path or "",
-            "original_quality": self.original_quality,
+            "original_quality": self.original_quality_config,
         }
 
     async def set_settings_data(
