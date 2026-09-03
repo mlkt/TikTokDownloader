@@ -32,6 +32,7 @@ class Write:
                         "earliest": "",
                         "latest": "",
                         "enable": True,
+                        "original_quality": None,
                     }
                 )
 
