@@ -157,10 +157,11 @@ Run <code>python main.py --help</code> (or <code>-h</code>) to display the compl
 <code>--original-quality-mode config|global|override</code> controls the priority of <code>original_quality</code>, default <code>config</code>; <code>config</code> uses the configuration file and account-level settings, <code>global</code> overrides the global configuration while account-level settings still take priority, and <code>override</code> overrides all settings including account-level values;<br>
 <code>--original-quality true|false</code> provides the target value, required only in <code>global</code> and <code>override</code> modes; values <code>1/0</code> are accepted and matching is case-insensitive;<br>
 <code>--record true|false</code> controls whether download history is enabled for this run; when omitted, the config file setting is used. Once provided, the menu "作品下载记录" cannot be toggled during this run;<br>
+<code>--run-command COMMAND</code> overrides the <code>run_command</code> setting for this run; multiple commands can be separated by ASCII commas or spaces, and values containing spaces must be quoted, for example <code>--run-command 6,2,1</code> or <code>--run-command "6 2 1"</code>; when omitted, the config file setting is used;<br>
 <code>--volume PATH</code> specifies the Volume data directory (configuration file, database, cache, and logs); relative paths are resolved against the current working directory at startup, and when omitted the <code>Volume</code> directory next to the program file is used;<br>
 <code>--suspend-batches integer</code> controls how many accounts/collections are processed between pauses, 0 disables pauses, default 1;<br>
 <code>--suspend-interval integer</code> controls the pause duration in seconds, 0 disables pauses, default 30;<br>
-Example: <code>python main.py --volume .\data --original-quality-mode global --original-quality true --record false --suspend-batches 10 --suspend-interval 300</code></p>
+Example: <code>python main.py --volume .\data --original-quality-mode global --original-quality true --record false --run-command 6,2,1 --suspend-batches 10 --suspend-interval 300</code></p>
 </ol>
 </li>
 <li>Read the disclaimer of DouK-Downloader and enter content according to the prompt.</li>

@@ -102,7 +102,7 @@ class Parameter:
         chunk: int,
         max_retry: int,
         max_pages: int,
-        run_command: str,
+        run_command: str | None,
         owner_url: dict,
         owner_url_tiktok: dict,
         live_qualities: str,
@@ -181,7 +181,13 @@ class Parameter:
         self.timeout = self.__check_timeout(timeout)
         self.max_retry = self.__check_max_retry(max_retry)
         self.max_pages = self.__check_max_pages(max_pages)
-        self.run_command = self.__check_run_command(run_command)
+        config_run_command = self.__check_run_command(run_command)
+        self.run_command_config = config_run_command
+        self.run_command = (
+            self.__check_run_command(CLI.run_command)
+            if CLI.run_command is not None
+            else config_run_command
+        )
         self.ffmpeg = self.__generate_ffmpeg_object(ffmpeg)
         self.live_qualities = self.__check_live_qualities(live_qualities)
         config_original_quality = self.check_bool_false(original_quality)
@@ -618,8 +624,10 @@ class Parameter:
         return ""
 
     @staticmethod
-    def __check_run_command(run_command: str) -> list:
-        return run_command.split()[::-1] if run_command else []
+    def __check_run_command(run_command: str | None) -> list[str]:
+        if not run_command:
+            return []
+        return run_command.replace(",", " ").split()[::-1]
 
     async def update_params(self) -> None:
         if self.douyin_platform:
@@ -911,7 +919,7 @@ class Parameter:
             "chunk": self.chunk,
             "max_retry": self.max_retry,
             "max_pages": self.max_pages,
-            "run_command": " ".join(self.run_command[::-1]),
+            "run_command": " ".join(self.run_command_config[::-1]),
             "ffmpeg": self.ffmpeg.path or "",
             "original_quality": self.original_quality_config,
         }

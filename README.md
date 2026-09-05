@@ -155,10 +155,11 @@ demo()
 <code>--original-quality-mode config|global|override</code> 控制 <code>original_quality</code> 的优先级，默认 <code>config</code>；<code>config</code> 使用配置文件和账号级设置，<code>global</code> 使用命令行值覆盖全局配置且账号级设置仍优先，<code>override</code> 强制覆盖包括账号级设置在内的全部配置；<br>
 <code>--original-quality true|false</code> 提供目标值，仅在 <code>global</code> 和 <code>override</code> 模式下必填，兼容 <code>1/0</code> 且不区分大小写；<br>
 <code>--record true|false</code> 控制本次运行是否启用作品下载记录，不传时使用配置文件设置；一旦传入，本次运行期间菜单「作品下载记录」将不可切换；<br>
+<code>--run-command COMMAND</code> 覆盖本次运行的 <code>run_command</code> 配置；多个序号或内容之间可使用英文逗号或空格分隔，使用空格分隔时整个内容需要加引号，例如 <code>--run-command 6,2,1</code> 或 <code>--run-command "6 2 1"</code>；不传时使用配置文件；<br>
 <code>--volume PATH</code> 指定 Volume 数据目录（配置文件、数据库、缓存和日志）；相对路径按启动时的当前工作目录解析，不传时使用程序文件目录下的 <code>Volume</code>；<br>
 <code>--suspend-batches 整数</code> 控制批量处理账号/合集时每处理多少个数据后暂停，0 表示禁用，默认 1；<br>
 <code>--suspend-interval 整数</code> 控制暂停秒数，0 表示禁用，默认 30；<br>
-示例：<code>python main.py --volume .\data --original-quality-mode global --original-quality true --record false --suspend-batches 10 --suspend-interval 300</code></p>
+示例：<code>python main.py --volume .\data --original-quality-mode global --original-quality true --record false --run-command 6,2,1 --suspend-batches 10 --suspend-interval 300</code></p>
 </ol>
 </li>
 <li>阅读 DouK-Downloader 的免责声明，根据提示输入内容</li>

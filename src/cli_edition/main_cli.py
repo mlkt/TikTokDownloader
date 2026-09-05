@@ -37,6 +37,7 @@ class CliOptions:
     original_quality_mode: str = "config"
     original_quality_value: bool | None = None
     record: bool | None = None
+    run_command: str | None = None
     suspend_batches: int = 1
     suspend_interval: int = 30
 
@@ -76,6 +77,7 @@ def create_parser() -> ArgumentParser:
             "  python main.py --help\n"
             "  DouK-Downloader --help\n"
             "  DouK-Downloader --original-quality-mode global --original-quality true --record false\n"
+            "  DouK-Downloader --run-command 6,2,1\n"
             "  DouK-Downloader --suspend-batches 10 --suspend-interval 300\n"
             "完整参数说明请查阅项目文档。"
         ),
@@ -135,6 +137,19 @@ def create_parser() -> ArgumentParser:
         ),
     )
     parser.add_argument(
+        "--run-command",
+        type=str,
+        metavar="COMMAND",
+        default=None,
+        help=(
+            "覆盖本次运行的 run_command 配置，相当于模拟用户输入序号或内容。"
+            "多个序号或内容之间可使用英文逗号或空格分隔；"
+            "使用空格分隔时整个内容需要加引号，例如 --run-command \"6 2 1\"。"
+            "省略时使用配置文件 run_command。"
+            "默认：未设置。"
+        ),
+    )
+    parser.add_argument(
         "--suspend-batches",
         type=parse_non_negative_integer,
         metavar="N",
@@ -179,6 +194,7 @@ def parse_arguments(
         original_quality_mode=args.original_quality_mode,
         original_quality_value=args.original_quality,
         record=args.record,
+        run_command=args.run_command,
         suspend_batches=args.suspend_batches,
         suspend_interval=args.suspend_interval,
     )
