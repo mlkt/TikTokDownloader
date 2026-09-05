@@ -1247,6 +1247,7 @@ class Parameter:
 
     @staticmethod
     def check_objects_from_external_py(console: "ColorfulConsole"):
+        """
         objects = load_objects_from_external_py(
             "encipher.py",
             [
@@ -1255,6 +1256,8 @@ class Parameter:
             ],
             console,
         )
+        """
+        objects = {}
         douyin_params = objects.get("DouYinParams", DouYinParams)
         tiktok_params = objects.get("TikTokParams", TikTokParams)
         return douyin_params(), tiktok_params()
