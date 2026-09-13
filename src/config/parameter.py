@@ -38,6 +38,7 @@ from ..tools import (
     Cleaner,
     DownloaderError,
     cookie_dict_to_str,
+    cookie_str_to_dict,
     create_client,
     get_ua_sync,
     load_objects_from_external_py,
@@ -131,7 +132,7 @@ class Parameter:
         self.ms_token = ""
         self.ms_token_tiktok = ""
 
-        self.headers = DATA_HEADERS
+        self.headers = DATA_HEADERS | {"x-tt-argus": "1"}
         self.headers_tiktok = DATA_HEADERS_TIKTOK
         self.headers_download = DOWNLOAD_HEADERS
         self.headers_download_tiktok = DOWNLOAD_HEADERS_TIKTOK
@@ -876,6 +877,12 @@ class Parameter:
     def set_uif_id(
         self,
     ) -> None:
+        if uifid := self.__get_cookie_uifid():
+            self.headers["uifid"] = uifid
+        elif self.cookie_dict or self.cookie_str:
+            self.logger.warning(
+                _("抖音 cookie 缺少 uifid 键值对，请尝试重新写入 cookie"),
+            )
         if self.cookie_dict:
             API.params["uifid"] = self.cookie_dict.get("UIFID", "")
         elif self.cookie_str:
@@ -883,6 +890,13 @@ class Parameter:
                 self.cookie_str,
                 "UIFID",
             )
+
+    def __get_cookie_uifid(self) -> str:
+        cookie = self.cookie_dict or cookie_str_to_dict(self.cookie_str)
+        return next(
+            (value for key, value in cookie.items() if key.lower() == "uifid"),
+            "",
+        )
 
     @staticmethod
     def __generate_ffmpeg_object(ffmpeg_path: str) -> FFMPEG:
@@ -1247,7 +1261,8 @@ class Parameter:
 
     @staticmethod
     def check_objects_from_external_py(console: "ColorfulConsole"):
-        """
+        # if not is_node_available():
+        #     console.print(_("未检测到 Node.js，部分功能可能受到影响！"))
         objects = load_objects_from_external_py(
             "encipher.py",
             [
@@ -1256,8 +1271,6 @@ class Parameter:
             ],
             console,
         )
-        """
-        objects = {}
         douyin_params = objects.get("DouYinParams", DouYinParams)
         tiktok_params = objects.get("TikTokParams", TikTokParams)
         return douyin_params(), tiktok_params()

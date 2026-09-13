@@ -6,7 +6,7 @@ VOLUME = CLI.volume
 VOLUME.mkdir(parents=True, exist_ok=True)
 VERSION_MAJOR = 5
 VERSION_MINOR = 8
-VERSION_BETA = True
+VERSION_BETA = False
 __VERSION__ = f"{VERSION_MAJOR}.{VERSION_MINOR}.{'beta' if VERSION_BETA else 'stable'}"
 PROJECT_NAME = f"DouK-Downloader V{VERSION_MAJOR}.{VERSION_MINOR} {
     'Beta' if VERSION_BETA else 'Stable'

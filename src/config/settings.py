@@ -181,6 +181,9 @@ class Settings:
     def __check(self, data: dict) -> dict:
         data = self.__compatible_with_old_settings(data)
         update = False
+        for key in ["browser_info", "browser_info_tiktok"]:
+            if "User-Agent" in data.get(key, {}):
+                del data[key]
         for i, j in self.default.items():
             if i not in data:
                 data[i] = j

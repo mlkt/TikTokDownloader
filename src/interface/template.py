@@ -1,6 +1,5 @@
 from time import time
 from typing import TYPE_CHECKING, Callable, Coroutine, Type, Union
-from urllib.parse import quote, urlencode
 
 from curl_cffi.requests import AsyncSession, get, post
 from rich.progress import (
@@ -11,7 +10,13 @@ from rich.progress import (
 )
 
 from ..custom import PROGRESS, wait
-from ..tools import DownloaderError, FakeProgress, Retry, capture_error_request
+from ..tools import (
+    DownloaderError,
+    FakeProgress,
+    Retry,
+    capture_error_request,
+    cookie_str_to_dict,
+)
 from ..translation import _
 
 if TYPE_CHECKING:
@@ -94,6 +99,16 @@ class API:
     def set_temp_cookie(self, cookie: str = ""):
         if cookie:
             self.headers["Cookie"] = cookie
+            uifid = next(
+                (
+                    value
+                    for key, value in cookie_str_to_dict(cookie).items()
+                    if key.lower() == "uifid"
+                ),
+                "",
+            )
+            if uifid:
+                self.headers["uifid"] = uifid
 
     def generate_params(
         self,
@@ -438,15 +453,9 @@ class API:
         **kwargs,
     ) -> str:
         if params:
-            params = urlencode(
-                params,
-                safe="=",
-                quote_via=quote,
-            )
-            params = self.douyin_params.sign_url(
+            return self.douyin_params.sign_url(
                 url, params, data, method, user_agent=self.user_agent
             )
-            return params
         return ""
 
     def summary_works(
@@ -589,12 +598,7 @@ class APITikTok(API):
         **kwargs,
     ) -> str:
         if params:
-            params = urlencode(
-                params,
-                safe="=",
-                quote_via=quote,
-            )
-            params = self.tiktok_params.sign_url(
+            return self.tiktok_params.sign_url(
                 url,
                 params,
                 data,
@@ -602,5 +606,4 @@ class APITikTok(API):
                 user_agent=self.user_agent_tiktok,
                 ms_token=self.params["msToken"],
             )
-            return params
         return ""

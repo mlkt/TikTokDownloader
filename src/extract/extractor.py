@@ -77,6 +77,7 @@ class Extractor:
         self.log: "BaseLogger" = params.logger
         self.date_format: str = params.date_format
         self.cleaner = params.CLEANER
+        self.download = params.download
         self.original_quality: bool = params.original_quality
         self.type: dict = {
             "batch": self.__batch,
